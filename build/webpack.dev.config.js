@@ -36,14 +36,12 @@ module.exports = merge(baseConfig, {
   },
   devServer: {
     compress: true,
-    port: 8080,
     historyApiFallback: true,
     proxy: {
-      // webpack开启代理
-      // '/plugin': {
-      //   target: 'http://localhost:8080',
-      //   changeOrigin: true,
-      // },
+      '/bill': {
+        target: 'http://14.103.232.255:32222',
+        changeOrigin: true,
+      },
     },
   }
 })

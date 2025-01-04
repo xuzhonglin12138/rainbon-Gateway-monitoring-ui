@@ -1,12 +1,140 @@
 import request from '../utils/request'
 
-// 接口书写示例
-export async function updataPluginInfo(data) {
+// 获取费用汇总
+// | 参数名     | 类型   | 必填 | 说明                                 |
+// | ---------- | ------ | ---- | ------------------------------------ |
+// | namespace  | string | 否   | 命名空间                             |
+// | app_id     | string | 否   | 应用ID                               |
+// | start_time | string | 否   | 开始时间，格式：2024-01-01T00:00:00Z |
+// | end_time   | string | 否   | 结束时间，格式：2024-01-02T00:00:00Z |
+export async function getCostSummary(params) {
   return request(
-    `/plugin/update`,
+    `/bill/api/v1/cost/summary`,
     {
-      method: 'put',
+      method: 'get',
+      params: params
+    }
+  );
+}
+
+// 获取服务级别的费用汇总
+// | 参数名     | 类型   | 必填 | 说明                                 |
+// | ---------- | ------ | ---- | ------------------------------------ |
+// | namespace  | string | 否   | 命名空间                             |
+// | app_id     | string | 否   | 应用ID                               |
+// | service_id | string | 否   | 服务ID                               |
+// | start_time | string | 否   | 开始时间，格式：2024-01-01T00:00:00Z |
+// | end_time   | string | 否   | 结束时间，格式：2024-01-02T00:00:00Z |
+// | page       | int    | 否   | 页码，从1开始，默认1                 |
+// | page_size  | int    | 否   | 每页大小，默认10                     |
+export async function getServiceCostSummary(params) {
+  return request(
+    `/bill/api/v1/cost/service`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
+
+// 获取应用级别的费用汇总
+// | 参数名     | 类型   | 必填 | 说明                                 |
+// | ---------- | ------ | ---- | ------------------------------------ |
+// | namespace  | string | 否   | 命名空间                             |
+// | app_id     | string | 否   | 应用ID                               |
+// | start_time | string | 否   | 开始时间，格式：2024-01-01T00:00:00Z |
+// | end_time   | string | 否   | 结束时间，格式：2024-01-02T00:00:00Z |
+// | page       | int    | 否   | 页码，从1开始，默认1                 |
+// | page_size  | int    | 否   | 每页大小，默认10                     |
+export async function getAppCostSummary(params) {
+  return request(
+    `/bill/api/v1/cost/app`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
+
+// 获取账单详情
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | event_id | string | 是   | 账单ID |
+export async function getBillDetails(params) {
+  return request(
+    `/bill/api/v1/cost/bill`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
+
+// 获取当前的资源价格配置
+export async function getPricingConfig() {
+  return request(
+    `/bill/api/v1/pricing`,
+    {
+      method: 'get'
+    }
+  );
+}
+
+// 获取微信充值二维码
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | amount   | int    | 是   | 充值金额(分) |
+// | description | string | 是   | 充值订单描述 |
+export async function getWechatRechargeCode(data) {
+  return request(
+    `/bill/api/v1/recharge`,
+    {
+      method: 'post',
       data: data
+    }
+  );
+}
+// 获取订单交易实时状态
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | order_no | string | 是   | 订单ID |
+export async function getOrderStatus(params) {
+  return request(
+    `/bill/api/v1/recharge/${params.order_no}/query`,
+    {
+      method: 'get'
+    }
+  );
+} 
+
+// 获取充值订单列表
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | page     | int    | 否   | 页码   |
+// | page_size| int    | 否   | 每页大小 |
+// | status   | string | 否   | SUCCESS：支付成功 REFUND：转入退款 NOTPAY：未支付 CLOSED：已关闭 |
+// | start_time| string | 否   | 开始时间 |
+// | end_time | string | 否   | 结束时间 |
+// | time_type | string | 否   | created-下单时间 paid-支付时间。当需要根据开始时间和结束时间筛选时，这个时间类型可以用于决定是根据下单时间筛选还是支付时间筛选 |
+
+export async function getRechargeList(params) {
+  return request(
+    `/bill/api/v1/recharge`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
+// 获取充值记录明细
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | order_no | string | 是   | 订单ID |
+export async function getRechargeDetail(params) {
+  return request(
+    `/bill/api/v1/recharge/${params.order_no}`,
+    {
+      method: 'get'
     }
   );
 }

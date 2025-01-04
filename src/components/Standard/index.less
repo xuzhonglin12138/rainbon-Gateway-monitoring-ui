@@ -1,0 +1,89 @@
+.container {
+  width: 100%;
+  :global {
+    .ant-typography {
+      margin-top: 0;
+    }
+  }
+  
+  .priceCards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin: 24px 0;
+    
+    .priceCard {
+      text-align: left;
+      :global {
+        .ant-card-body {
+          padding: 12px;
+        }
+        .ant-typography {
+          margin-top: 8px;
+          margin-bottom: 8px;
+          
+          &.ant-typography-h4 {
+            font-size: 16px;
+          }
+          
+          &.ant-typography-h3 {
+            font-size: 20px;
+            margin-top: 8px;
+          }
+        }
+      }
+    }
+  }
+  
+  .calculator {
+    background: #f5f5f5;
+    padding: 24px;
+    border-radius: 8px;
+    margin-top: 24px;
+    
+    .inputs {
+      margin: 20px 0;
+      
+      .inputRow {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        
+        .inputGroup {
+          flex: 1;
+        }
+      }
+      
+      .inputGroup {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        
+        :global {
+          .ant-select {
+            width: 80px;
+            margin-left: 8px;
+          }
+        }
+      }
+    }
+    
+    .total {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e8e8e8;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  width: 100%;
+}

@@ -14,51 +14,47 @@ const locales = {
 export default class index extends Component {
   constructor(props) {
     super(props);
+    const { baseInfo = {} } = props;
     this.state = {
-      colorPrimary: this.props?.baseInfo?.colorPrimary || '#1677ff',
-      currentLocale: this.props?.baseInfo?.currentLocale || 'zh',
+      colorPrimary: baseInfo.colorPrimary || '#1677ff',
+      currentLocale: baseInfo.currentLocale || 'zh',
       initDone: false,
       antdLocale: zhCN
     }
   }
-  componentDidMount() {
-    this.loadLocales()
+
+  componentDidMount = () => {
+    this.loadLocales();
   }
-  loadLocales() {
-    const { currentLocale } = this.state
-    if (currentLocale == 'zh') {
-      this.setState({
-        antdLocale: zhCN
-      })
-      dayjs.locale('zh-cn');
-    } else {
-      this.setState({
-        antdLocale: enUS
-      })
-      dayjs.locale('en');
-    }
-    intl.init({
-      currentLocale: currentLocale,
+
+  loadLocales = () => {
+    const { currentLocale } = this.state;
+    const antdLocale = currentLocale === 'zh' ? zhCN : enUS;
+    const dayjsLocale = currentLocale === 'zh' ? 'zh-cn' : 'en';
+
+    this.setState({ antdLocale });
+    dayjs.locale(dayjsLocale);
+
+    await intl.init({
+      currentLocale,
       locales,
-    })
-      .then(() => {
-        this.setState({ initDone: true });
-      });
+    });
+
+    this.setState({ initDone: true });
   }
+
   render() {
-    const { colorPrimary, antdLocale } = this.state
+    const { colorPrimary, antdLocale, initDone } = this.state;
     return (
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: colorPrimary
+            colorPrimary
           }
         }}
         locale={antdLocale}
       >
-        {this.state.initDone &&
-          <Content {...this.props} />
-        }
+        {initDone && <Content {...this.props} />}
       </ConfigProvider>
     )
   }
