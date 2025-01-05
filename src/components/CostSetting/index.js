@@ -38,9 +38,9 @@ export default class index extends Component {
       content: '确定要保存设置吗？',
       onOk: () => {
         updatePricingConfig({
-          cpu_price_per_hour: Number(values.cpuPrice),
-          memory_price_per_hour: Number(values.memoryPrice),
-          storage_price_per_hour: Number(values.storagePrice),
+          cpu_price_per_core: Number(values.cpuPrice),
+          memory_price_per_mb: Number(values.memoryPrice),
+          storage_price_per_gb: Number(values.storagePrice),
           network_price_per_mb: Number(values.networkPrice)
         }).then(() => {
           notification.success({
