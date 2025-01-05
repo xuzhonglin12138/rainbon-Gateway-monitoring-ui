@@ -1,5 +1,5 @@
 import axios from 'axios';
-// import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 const http = axios.create({
   baseURL: '',  // 你的API地址
@@ -9,9 +9,7 @@ const http = axios.create({
 // 请求拦截器
 http.interceptors.request.use(
   config => {
-    // 在发送请求之前做些什么：例如添加token
-    // config.headers['Authorization'] = '你的token';
-    // config.headers.authorization=`GRJWT ${Cookies.get('token')}`
+    config.headers.authorization=`GRJWT ${Cookies.get('token')}`
     return config;
   },
   error => {

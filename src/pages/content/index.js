@@ -50,9 +50,9 @@ export default class index extends Component {
           </div>
         </div>
         <div className={styles.content}>
-          {activeKey === 'orderManagement' && <OrderManagement />}
-          {activeKey === 'expenseStatement' && <ExpenseStatement />}
-          {activeKey === 'costSetting' && <CostSetting />}
+          {activeKey === 'orderManagement' && <OrderManagement {...this.props} />}
+          {activeKey === 'expenseStatement' && <ExpenseStatement {...this.props} />}
+          {activeKey === 'costSetting' && <CostSetting {...this.props} />}
         </div>
       </div>
     )

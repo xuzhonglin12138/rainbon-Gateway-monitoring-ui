@@ -30,11 +30,12 @@ export default class UsageDetails extends Component {
   getServiceCostSummary = (bool) => {
     this.setState({ serviceCostLoading: true });
     const { dateRange, selectedProject, serviceCostPage, serviceCostPageSize } = this.state;
+    const { globalUtile } = this.props;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: 'rbd-prd',
+      namespace: globalUtile?.getCurrRegionName() || '',
       page: serviceCostPage,
       page_size: serviceCostPageSize
     }
@@ -78,11 +79,12 @@ export default class UsageDetails extends Component {
   getCostSummary = () => {
     this.setState({ summaryLoading: true });
     const { dateRange, selectedProject } = this.state;
+    const { globalUtile } = this.props;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: 'rbd-prd'
+      namespace: globalUtile?.getCurrRegionName() || ''
     }
     getCostSummary(params).then(res => {
 

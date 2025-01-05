@@ -47,7 +47,7 @@ export default class Recharge extends Component {
         <Title level={4}>充值金额</Title>
         <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
           {this.amountOptions.map(amount => (
-            <Col span={6} key={amount}>
+            <Col span={6} key={amount} style={{ marginBottom: 12 }}>
               <Card 
                 className={`${styles.amountCard} ${this.state.selectedAmount === amount ? styles.selected : ''}`}
                 onClick={() => {

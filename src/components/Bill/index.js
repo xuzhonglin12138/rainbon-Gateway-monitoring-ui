@@ -17,6 +17,7 @@ import {
 } from '@/api';
 import styles from './index.less';
 import moment from 'moment';
+import { getNamespace } from '@/utils/global';
 import DetailModal from '@/components/DetailModal';
 import RechargeModal from '@/components/RechargeModal';
 
@@ -72,13 +73,15 @@ export default class Recharge extends Component {
   fetchExpenseList = (bool) => {
     this.setState({ expenseLoading: true });
     const { dateRange, selectedProject, expensePage, expensePageSize } = this.state;
+    const { baseInfo } = this.props;
+    const namespaceArr = getNamespace(baseInfo);
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       page: expensePage || 1,
       page_size: expensePageSize || 5,
-      namespace: 'yanghl'
+      namespace: namespaceArr.length > 0 ? namespaceArr.join(',') : ''
     }
     getAppCostSummary(params).then(res => {
       let projectList = [];

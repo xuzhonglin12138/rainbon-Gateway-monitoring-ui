@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { ConfigProvider } from 'antd'
-import Content from '../page/Content/index'
+import Content from '../pages/Content/index'
 import intl from 'react-intl-universal';
 import dayjs from 'dayjs';
 import enUS from 'antd/locale/en_US';
@@ -23,24 +23,30 @@ export default class index extends Component {
     }
   }
 
-  componentDidMount = () => {
+  componentDidMount() {
     this.loadLocales();
   }
 
   loadLocales = () => {
-    const { currentLocale } = this.state;
-    const antdLocale = currentLocale === 'zh' ? zhCN : enUS;
-    const dayjsLocale = currentLocale === 'zh' ? 'zh-cn' : 'en';
-
-    this.setState({ antdLocale });
-    dayjs.locale(dayjsLocale);
-
-    await intl.init({
-      currentLocale,
+    const { currentLocale } = this.state
+    if (currentLocale == 'zh') {
+      this.setState({
+        antdLocale: zhCN
+      })
+      dayjs.locale('zh-cn');
+    } else {
+      this.setState({
+        antdLocale: enUS
+      })
+      dayjs.locale('en');
+    }
+    intl.init({
+      currentLocale: currentLocale,
       locales,
-    });
-
-    this.setState({ initDone: true });
+    })
+      .then(() => {
+        this.setState({ initDone: true });
+      });
   }
 
   render() {
