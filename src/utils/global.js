@@ -1,5 +1,5 @@
-export const getNamespace = (baseInfo) => {
-  const { currentUser } = baseInfo;
+export const getNamespace = (baseInfo = {}) => {
+  const { currentUser = {} } = baseInfo;
   const teams = currentUser?.teams || [];
   let namespaceArr = [];
   teams.forEach(team => {

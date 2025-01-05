@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Typography, Card, Row, Col, Input, Button } from 'antd';
 import styles from './index.less';
 import WeChatRechargeModal from '../WeChatRechargeModal';
+import { getFinancialData } from '@/api';
 
 const { Title, Text } = Typography;
 
@@ -15,6 +16,17 @@ export default class Recharge extends Component {
     };
   }
 
+  componentDidMount() {
+    this.fetchFinancialData();
+  }
+  fetchFinancialData = () => {
+    getFinancialData().then(res => {
+      this.setState({
+        balance: res.data.balance,
+        totalExpense: res.data.total_expense,
+      });
+    });
+  }
   // 预设的充值金额选项
   amountOptions = [50, 100, 200, 500, 1000, '其他金额'];
 
@@ -29,7 +41,7 @@ export default class Recharge extends Component {
               <Card>
                 <Text type="secondary">当前余额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#52c41a', fontSize: '24px' }}>¥ 1000.00</Text>
+                  <Text strong style={{ color: '#52c41a', fontSize: '24px' }}>¥ {this.state.balance}</Text>
                 </div>
               </Card>
             </Col>
@@ -37,7 +49,7 @@ export default class Recharge extends Component {
               <Card>
                 <Text type="secondary">支出金额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#f5222d', fontSize: '24px' }}>¥ 500.00</Text>
+                  <Text strong style={{ color: '#f5222d', fontSize: '24px' }}>¥ {this.state.totalExpense}</Text>
                 </div>
               </Card>
             </Col>

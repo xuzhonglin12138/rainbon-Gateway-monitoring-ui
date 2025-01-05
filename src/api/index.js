@@ -79,6 +79,22 @@ export async function getPricingConfig() {
     }
   );
 }
+// PUT /bill/api/v1/pricing
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | cpu_price_per_hour | float | 否   | CPU单价(元/小时) |
+// | memory_price_per_hour | float | 否   | 内存单价(元/小时) |
+// | storage_price_per_hour | float | 否   | 存储单价(元/小时) |
+// | network_price_per_mb | float | 否   | 流量单价(元/MB) |
+export async function updatePricingConfig(data) {
+  return request(
+    `/bill/api/v1/pricing`,
+    {
+      method: 'put',
+      data: data
+    }
+  );
+}
 
 // 获取微信充值二维码
 // | 参数名   | 类型   | 必填 | 说明   |
@@ -133,6 +149,32 @@ export async function getRechargeList(params) {
 export async function getRechargeDetail(params) {
   return request(
     `/bill/api/v1/recharge/${params.order_no}`,
+    {
+      method: 'get'
+    }
+  );
+}
+// 获取每日账单列表，支持按时间范围和命名空间查询，包含分页和汇总信息。
+// |            | 类型   | 必填 | 说明                                             |
+// | ---------- | ------ | ---- | ------------------------------------------------ |
+// | start_date | string | 否   | 开始日期，格式：2024-01-01。默认为结束日期前30天 |
+// | end_date   | string | 否   | 结束日期，格式：2024-01-02。默认为当前日期       |
+// | namespace  | string | 否   | 命名空间                                         |
+// | page       | int    | 否   | 页码，从1开始，默认1                             |
+// | page_size  | int    | 否   | 每页大小，默认10，最大100                        |
+export async function getDailyBillList(params) {
+  return request(
+    `/bill/api/v1/cost/daily`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
+// 获取充值页面数据
+export async function getFinancialData() {
+  return request(
+    `/bill/api/v1/account/financial`,
     {
       method: 'get'
     }

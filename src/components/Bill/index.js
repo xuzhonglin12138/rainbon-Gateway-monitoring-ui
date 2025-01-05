@@ -190,7 +190,6 @@ export default class Recharge extends Component {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      // SUCCESS：支付成功 REFUND：转入退款 NOTPAY：未支付 CLOSED：已关闭 
       render: (text) => {
         let color = '';
         let statusText = '';
