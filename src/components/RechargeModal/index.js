@@ -33,7 +33,7 @@ const RechargeModal = ({ visible, onClose, orderDetails }) => {
     >
       <Descriptions bordered>
         <Descriptions.Item label="订单号">{orderDetails?.order_no}</Descriptions.Item>
-        <Descriptions.Item label="交易时间">{moment(orderDetails?.pay_time).format('YYYY-MM-DD HH:mm:ss')}</Descriptions.Item>
+        <Descriptions.Item label="交易时间">{orderDetails?.pay_time ? moment(orderDetails?.pay_time).format('YYYY-MM-DD HH:mm:ss') : '-'}</Descriptions.Item>
         <Descriptions.Item label="支付方式">{orderDetails?.pay_method}</Descriptions.Item>
         <Descriptions.Item label="状态">
           <Tag color={color}>{statusText}</Tag>
