@@ -20,6 +20,9 @@ export default class Recharge extends Component {
     this.fetchFinancialData();
   }
   fetchFinancialData = () => {
+    this.setState({
+      customAmount: ''
+    })  
     getFinancialData().then(res => {
       this.setState({
         balance: res.data.balance,
@@ -41,7 +44,7 @@ export default class Recharge extends Component {
               <Card>
                 <Text type="secondary">当前余额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#52c41a', fontSize: '24px' }}>¥ {this.state.balance}</Text>
+                  <Text strong style={{ color: '#52c41a', fontSize: '24px' }}>¥ {this.state.balance/100}</Text>
                 </div>
               </Card>
             </Col>
@@ -49,7 +52,7 @@ export default class Recharge extends Component {
               <Card>
                 <Text type="secondary">支出金额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#f5222d', fontSize: '24px' }}>¥ {this.state.totalExpense}</Text>
+                  <Text strong style={{ color: '#f5222d', fontSize: '24px' }}>¥ {this.state.totalExpense/100}</Text>
                 </div>
               </Card>
             </Col>
@@ -104,6 +107,7 @@ export default class Recharge extends Component {
           <WeChatRechargeModal 
             visible={this.state.isModalVisible} 
             customAmount={this.state.customAmount}
+            onOk={this.fetchFinancialData}
             onClose={() => this.setState({ isModalVisible: false })}
           />
         )}

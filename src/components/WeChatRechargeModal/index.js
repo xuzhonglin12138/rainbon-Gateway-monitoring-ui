@@ -27,6 +27,7 @@ export default class WeChatRechargeModal extends Component {
           description: '您的账户已成功充值'
         });
         this.props.onClose();
+        this.props.onOk();
       } else {
         setTimeout(this.getWechatRechargeStatus, 1000);
       }
