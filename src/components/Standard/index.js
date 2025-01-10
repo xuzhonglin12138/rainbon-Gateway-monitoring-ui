@@ -82,7 +82,7 @@ export default class Recharge extends Component {
   render() {
     const { memory, cpu, storage, traffic, duration, timeUnit, pricingConfig, pricingLoading } = this.state;
     const priceCards = [
-      { title: '内存', subtitle: '每MB/小时价格', price: `¥${pricingConfig?.memory_price_per_mb || '0'}` },
+      { title: '内存', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.memory_price_per_mb || '0'}` },
       { title: 'CPU', subtitle: '每Core/小时价格', price: `¥${pricingConfig?.cpu_price_per_core || '0'}` },
       { title: '存储', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.storage_price_per_gb || '0'}` },
       { title: '流量', subtitle: '每MB/小时价格', price: `¥${pricingConfig?.network_price_per_mb || '0'}` },
@@ -129,7 +129,7 @@ export default class Recharge extends Component {
             <div className={styles.inputs}>
               <div className={styles.inputRow}>
                 <div className={styles.inputGroup}>
-                  <Text>内存 (MB)</Text>
+                  <Text>内存 (GB)</Text>
                   <Input value={memory} onChange={e => this.handleInputChange('memory', e.target.value)} />
                 </div>
                 <div className={styles.inputGroup}>

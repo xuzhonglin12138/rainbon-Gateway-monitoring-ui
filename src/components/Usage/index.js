@@ -35,7 +35,7 @@ export default class UsageDetails extends Component {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: globalUtile?.getCurrRegionName() || '',
+      namespace: globalUtile?.getCurrTeamName() || '',
       page: serviceCostPage,
       page_size: serviceCostPageSize
     }
@@ -84,7 +84,7 @@ export default class UsageDetails extends Component {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: globalUtile?.getCurrRegionName() || ''
+      namespace: globalUtile?.getCurrTeamName() || ''
     }
     getCostSummary(params).then(res => {
 
