@@ -134,7 +134,7 @@ export default class UsageDetails extends Component {
       { key: '4', label: '流量', value: `¥${summaryData?.network_cost?.toFixed(2) || 0}` },
     ];
     const columns = [
-      { title: '应用', dataIndex: 'app_id', key: 'app_id' },
+      { title: '应用', dataIndex: 'app_name', key: 'app_name' },
       { title: '内存', dataIndex: 'memory_cost', key: 'memory_cost', render: (text) => `¥${text?.toFixed(2) || 0}` },
       { title: 'CPU', dataIndex: 'cpu_cost', key: 'cpu_cost', render: (text) => `¥${text?.toFixed(2) || 0}` },
       { title: '存储', dataIndex: 'storage_cost', key: 'storage_cost', render: (text) => `¥${text?.toFixed(2) || 0}` },

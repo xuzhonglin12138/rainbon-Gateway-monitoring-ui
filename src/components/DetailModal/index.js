@@ -17,37 +17,42 @@ const DetailModal = ({ visible, onClose, detailData }) => {
         <div className={styles.summary}>
           <div>
             <p>总金额（元）</p>
-            <p>-¥{detailData?.summary?.total_cost.toFixed(2) || 0}</p>
+            <p>-¥{(detailData?.summary?.total_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
             <p>CPU费用(元)</p>
-            <p>-¥{detailData?.summary?.cpu_cost.toFixed(2) || 0}</p>
+            <p>-¥{(detailData?.summary?.cpu_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
             <p>内存费用(元)</p>
-            <p>-¥{detailData?.summary?.memory_cost.toFixed(2) || 0}</p>
+            <p>-¥{(detailData?.summary?.memory_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
             <p>存储费用(元)</p>
-            <p>-¥{detailData?.summary?.storage_cost.toFixed(2) || 0}</p>
+            <p>-¥{(detailData?.summary?.storage_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
             <p>网络费用(元)</p>
-            <p>-¥{detailData?.summary?.network_cost.toFixed(2) || 0}</p>
+            <p>-¥{(detailData?.summary?.network_cost / 100).toFixed(2) || 0}</p>
           </div>
         </div>
         <Table
           columns={[
             { title: '组件名称', dataIndex: 'service_id', key: 'service_id' },
             { title: 'CPU(Core)', dataIndex: 'cpu', key: 'cpu' },
-            { title: 'CPU金额(元)', dataIndex: 'cpu_cost', key: 'cpu_cost', render: (text) => `-¥${text.toFixed(2)}` },
+            { title: 'CPU金额(元)', dataIndex: 'cpu_cost', key: 'cpu_cost', 
+              render: (text) => `-¥${(text / 100).toFixed(2)}` },
             { title: '内存(MB)', dataIndex: 'memory', key: 'memory' },
-            { title: '内存金额(元)', dataIndex: 'memory_cost', key: 'memory_cost', render: (text) => `-¥${text.toFixed(2)}`   },
+            { title: '内存金额(元)', dataIndex: 'memory_cost', key: 'memory_cost', 
+              render: (text) => `-¥${(text / 100).toFixed(2)}` },
             { title: '存储(GB)', dataIndex: 'storage', key: 'storage' },
-            { title: '存储金额(元)', dataIndex: 'storage_cost', key: 'storage_cost', render: (text) => `-¥${text.toFixed(2)}` },
+            { title: '存储金额(元)', dataIndex: 'storage_cost', key: 'storage_cost', 
+              render: (text) => `-¥${(text / 100).toFixed(2)}` },
             { title: '网络(MB)', dataIndex: 'network_io', key: 'network_io' },
-            { title: '网络金额(元)', dataIndex: 'network_cost', key: 'network_cost', render: (text) => `-¥${text.toFixed(2)}` },
-            { title: '总金额(元)', dataIndex: 'total_cost', key: 'total_cost', render: (text) => `-¥${text.toFixed(2)}` },
+            { title: '网络金额(元)', dataIndex: 'network_cost', key: 'network_cost', 
+              render: (text) => `-¥${(text / 100).toFixed(2)}` },
+            { title: '总金额(元)', dataIndex: 'total_cost', key: 'total_cost', 
+              render: (text) => `-¥${(text / 100).toFixed(2)}` },
           ]}
           dataSource={detailData.service_costs}
           rowKey="componentName"

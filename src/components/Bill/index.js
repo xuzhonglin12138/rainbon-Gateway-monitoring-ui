@@ -141,14 +141,47 @@ export default class Recharge extends Component {
   expenseColumns = [
     {
       title: '应用名称',
-      dataIndex: 'app_id',
-      key: 'app_id',
+      dataIndex: 'app_name',
+      key: 'app_name',
+    },
+    {
+      title: '账单时间',
+      dataIndex: 'bill_time',
+      key: 'bill_time',
+      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '交易时间',
-      dataIndex: 'start_time',
-      key: 'start_time',
+      dataIndex: 'payment_time',
+      key: 'payment_time',
       render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      title: '账单状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (text) => {
+        let color = '';
+        let statusText = '';
+        switch (text) {
+          case 'PAID':
+            color = 'green';
+            statusText = '已支付';
+            break;
+          case 'UNPAID':
+            color = 'red';
+            statusText = '未支付';
+            break;
+          case 'PENDING':
+            color = 'orange';
+            statusText = '处理中';
+            break;
+          default:
+            color = 'default';
+            statusText = '未知状态';
+        }
+        return <Tag color={color}>{statusText}</Tag>;
+      },
     },
     {
       title: '总金额 (¥)',
@@ -156,7 +189,7 @@ export default class Recharge extends Component {
       key: 'total_cost',
       render: (amount) => (
         <span style={{ color: '#ff4d4f' }}>
-          -¥{amount.toFixed(2)}
+          -¥{(amount / 100).toFixed(2)}
         </span>
       ),
     },
