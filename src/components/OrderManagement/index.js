@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { DatePicker, Button, Table, Tag, Select, notification, Row, Col } from 'antd';
 import moment from 'moment';
-import { getRechargeList, getRechargeDetail } from '@/api';
+import { getAllRechargeList, getRechargeDetail } from '@/api';
 import RechargeModal from '@/components/RechargeModal';
 import styles from './index.less';
 
@@ -43,9 +43,9 @@ export default class OrderManagement extends Component {
       page: rechargePage || 1,
       page_size: rechargePageSize || 5,
     }
-    getRechargeList(params).then(res => {
+    getAllRechargeList(params).then(res => {
       console.log(res);
-      this.setState({ rechargeList: res.data.records, rechargeTotal: res.data.total, rechargeLoading: false });
+      this.setState({ rechargeList: res.data.data, rechargeTotal: res.data.total, rechargeLoading: false });
     }).catch(err => {
       notification.error({
         message: '获取充值订单列表失败',
@@ -102,6 +102,11 @@ export default class OrderManagement extends Component {
         title: '订单号',
         dataIndex: 'order_no',
         key: 'order_no',
+      },
+      {
+        title: '充值用户',
+        dataIndex: 'user_name',
+        key: 'user_name',
       },
       {
         title: '交易时间',

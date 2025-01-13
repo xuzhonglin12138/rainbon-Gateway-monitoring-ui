@@ -180,3 +180,21 @@ export async function getFinancialData() {
     }
   );
 }
+// 管理员获取全部充值订单
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | page     | int    | 否   | 页码   |
+// | page_size| int    | 否   | 每页大小 |
+// | status   | string | 否   | SUCCESS：支付成功 REFUND：转入退款 NOTPAY：未支付 CLOSED：已关闭 |
+// | start_time| string | 否   | 开始时间 |
+// | end_time | string | 否   | 结束时间 |
+// | time_type | string | 否   | created-下单时间 paid-支付时间。当需要根据开始时间和结束时间筛选时，这个时间类型可以用于决定是根据下单时间筛选还是支付时间筛选 |
+export async function getAllRechargeList(params) {
+  return request(
+    `/api/v1/admin/recharges`,
+    {
+      method: 'get',
+      params: params
+    }
+  );
+}
