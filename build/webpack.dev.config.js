@@ -38,7 +38,7 @@ module.exports = merge(baseConfig, {
     compress: true,
     historyApiFallback: true,
     proxy: {
-      '/bill': {
+      '/api/v1': {
         target: 'http://14.103.232.255:32222',
         changeOrigin: true,
       },

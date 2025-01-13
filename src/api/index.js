@@ -9,7 +9,7 @@ import request from '../utils/request'
 // | end_time   | string | 否   | 结束时间，格式：2024-01-02T00:00:00Z |
 export async function getCostSummary(params) {
   return request(
-    `/bill/api/v1/cost/summary`,
+    `/api/v1/user/cost/summary`,
     {
       method: 'get',
       params: params
@@ -29,7 +29,7 @@ export async function getCostSummary(params) {
 // | page_size  | int    | 否   | 每页大小，默认10                     |
 export async function getServiceCostSummary(params) {
   return request(
-    `/bill/api/v1/cost/service`,
+    `/api/v1/user/cost/service`,
     {
       method: 'get',
       params: params
@@ -48,7 +48,7 @@ export async function getServiceCostSummary(params) {
 // | page_size  | int    | 否   | 每页大小，默认10                     |
 export async function getAppCostSummary(params) {
   return request(
-    `/bill/api/v1/cost/app`,
+    `/api/v1/user/cost/app`,
     {
       method: 'get',
       params: params
@@ -62,7 +62,7 @@ export async function getAppCostSummary(params) {
 // | event_id | string | 是   | 账单ID |
 export async function getBillDetails(params) {
   return request(
-    `/bill/api/v1/cost/bill`,
+    `/api/v1/user/cost/bill`,
     {
       method: 'get',
       params: params
@@ -73,13 +73,13 @@ export async function getBillDetails(params) {
 // 获取当前的资源价格配置
 export async function getPricingConfig() {
   return request(
-    `/bill/api/v1/pricing`,
+    `/api/v1/pricing`,
     {
       method: 'get'
     }
   );
 }
-// PUT /bill/api/v1/pricing
+// PUT /api/v1/admin/pricing
 // | 参数名   | 类型   | 必填 | 说明   |
 // | -------- | ------ | ---- | ------ |
 // | cpu_price_per_core | float | 否   | CPU单价(元/小时) |
@@ -88,7 +88,7 @@ export async function getPricingConfig() {
 // | network_price_per_mb | float | 否   | 流量单价(元/MB) |
 export async function updatePricingConfig(data) {
   return request(
-    `/bill/api/v1/pricing`,
+    `/api/v1/admin/pricing`,
     {
       method: 'put',
       data: data
@@ -103,7 +103,7 @@ export async function updatePricingConfig(data) {
 // | description | string | 是   | 充值订单描述 |
 export async function getWechatRechargeCode(data) {
   return request(
-    `/bill/api/v1/recharge`,
+    `/api/v1/user/recharge`,
     {
       method: 'post',
       data: data
@@ -116,7 +116,7 @@ export async function getWechatRechargeCode(data) {
 // | order_no | string | 是   | 订单ID |
 export async function getOrderStatus(params) {
   return request(
-    `/bill/api/v1/recharge/${params.order_no}/query`,
+    `/api/v1/user/recharge/${params.order_no}/query`,
     {
       method: 'get'
     }
@@ -135,7 +135,7 @@ export async function getOrderStatus(params) {
 
 export async function getRechargeList(params) {
   return request(
-    `/bill/api/v1/recharge`,
+    `/api/v1/user/recharge`,
     {
       method: 'get',
       params: params
@@ -148,7 +148,7 @@ export async function getRechargeList(params) {
 // | order_no | string | 是   | 订单ID |
 export async function getRechargeDetail(params) {
   return request(
-    `/bill/api/v1/recharge/${params.order_no}`,
+    `/api/v1/user/recharge/${params.order_no}`,
     {
       method: 'get'
     }
@@ -164,7 +164,7 @@ export async function getRechargeDetail(params) {
 // | page_size  | int    | 否   | 每页大小，默认10，最大100                        |
 export async function getDailyBillList(params) {
   return request(
-    `/bill/api/v1/cost/daily`,
+    `/api/v1/user/cost/daily`,
     {
       method: 'get',
       params: params
@@ -174,7 +174,7 @@ export async function getDailyBillList(params) {
 // 获取充值页面数据
 export async function getFinancialData() {
   return request(
-    `/bill/api/v1/account/financial`,
+    `/api/v1/user/account/financial`,
     {
       method: 'get'
     }
