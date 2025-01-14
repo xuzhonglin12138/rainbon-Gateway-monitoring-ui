@@ -10,6 +10,7 @@ const { RangePicker } = DatePicker;
 export default class UsageDetails extends Component {
   constructor(props) {
     super(props);
+    const namespaceStr = this.props.baseInfo.currentUser.teams?.map(item => item.namespace).join(',') || ''
     this.state = {
       dateRange: [],
       selectedProject: '',
@@ -19,23 +20,24 @@ export default class UsageDetails extends Component {
       serviceCostLoading: false,
       serviceCostPage: 1,
       serviceCostPageSize: 5,
-      serviceCostTotal: 0
+      serviceCostTotal: 0,
+      namespace: namespaceStr || '',
     };
   }
 
   componentDidMount() {
+    console.log(this.props, 'props')
     this.getCostSummary();
     this.getServiceCostSummary(true);
   }
   getServiceCostSummary = (bool) => {
     this.setState({ serviceCostLoading: true });
-    const { dateRange, selectedProject, serviceCostPage, serviceCostPageSize } = this.state;
-    const { globalUtile } = this.props;
+    const { dateRange, selectedProject, serviceCostPage, serviceCostPageSize, namespace } = this.state;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: globalUtile?.getCurrTeamName() || '',
+      namespace: namespace || '',
       page: serviceCostPage,
       page_size: serviceCostPageSize
     }
@@ -78,13 +80,12 @@ export default class UsageDetails extends Component {
   // 获取费用汇总
   getCostSummary = () => {
     this.setState({ summaryLoading: true });
-    const { dateRange, selectedProject } = this.state;
-    const { globalUtile } = this.props;
+    const { dateRange, selectedProject, namespace } = this.state;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: globalUtile?.getCurrTeamName() || ''
+      namespace: namespace || ''
     }
     getCostSummary(params).then(res => {
 
