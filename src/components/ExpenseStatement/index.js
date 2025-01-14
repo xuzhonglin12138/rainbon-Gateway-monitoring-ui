@@ -10,6 +10,7 @@ const { RangePicker } = DatePicker;
 export default class index extends Component {
   constructor(props) {
     super(props)
+    const namespaceStr = this.props.baseInfo.currentUser.teams?.map(item => item.namespace).join(',') || ''
     this.state = {
       dateValue: [],
       expenseLoading: false,
@@ -20,7 +21,7 @@ export default class index extends Component {
       dateRange: [],
       expenseSearchText: '',
       namespaceList: [],
-      namespace: '',
+      namespace: namespaceStr || '',
     }
   }
   componentDidMount() {
