@@ -164,7 +164,7 @@ export async function getRechargeDetail(params) {
 // | page_size  | int    | 否   | 每页大小，默认10，最大100                        |
 export async function getDailyBillList(params) {
   return request(
-    `/api/v1/user/cost/daily`,
+    `/api/v1/admin/daily-bills`,
     {
       method: 'get',
       params: params
