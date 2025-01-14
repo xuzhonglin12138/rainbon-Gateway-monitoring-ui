@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, notification } from 'antd'
 import Content from '../pages/Content/index'
 import intl from 'react-intl-universal';
 import dayjs from 'dayjs';
@@ -25,6 +25,12 @@ export default class index extends Component {
 
   componentDidMount() {
     this.loadLocales();
+    notification.config({
+      className: 'custom-class',
+      style: {
+        marginBottom: 0,
+      },
+    });
   }
 
   loadLocales = () => {

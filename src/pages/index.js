@@ -58,6 +58,12 @@ export default class index extends Component {
             colorPrimary: colorPrimary
           }
         }}
+        notification={{
+          className: 'custom-class',
+          style: {
+            marginBottom: 0,
+          }
+        }}
         locale={antdLocale}
       >
         {this.state.initDone &&

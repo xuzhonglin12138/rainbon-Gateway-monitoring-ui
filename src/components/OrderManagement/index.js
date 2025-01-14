@@ -181,7 +181,7 @@ export default class OrderManagement extends Component {
             </Col>
             <Col span={8}>
               <Select
-                style={{ width: 200 }}
+                  style={{ width: 200, marginLeft: 10 }}
                 placeholder="选择状态"
                 value={this.state.rechargeSearchText}
                 onChange={this.handleRechargeStatusChange}

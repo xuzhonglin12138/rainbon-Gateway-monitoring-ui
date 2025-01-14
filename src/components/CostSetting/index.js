@@ -1,98 +1,29 @@
 import React, { Component } from 'react'
-import { Form, Button, InputNumber, Spin, Modal, notification } from 'antd'
-import {
-  getPricingConfig,
-  updatePricingConfig
-} from '@/api'
+import { Tabs } from 'antd'
+import SettingFrom from './settingFrom'
 
 export default class index extends Component {
   constructor(props) {
     super(props);
+    const { baseInfo } = props || {};
     this.state = {
-      cpuPrice: 0,
-      memoryPrice: 0,
-      storagePrice: 0,
-      networkPrice: 0
+      cluster_info: baseInfo?.cluster_info || {},
     }
   }
-  componentDidMount() {
-    this.getPricingConfig();
-  }
-  getPricingConfig = () => {
-    this.setState({
-      loading: true
-    })
-    getPricingConfig().then(res => {      
-      this.setState({
-        cpuPrice: res.data.cpu_price_per_core,
-        memoryPrice: res.data.memory_price_per_mb,
-        storagePrice: res.data.storage_price_per_gb,
-        networkPrice: res.data.network_price_per_mb,
-        loading: false
+  render() {
+    const items = []
+    const { cluster_info } = this.state;
+    (cluster_info || []).forEach((item) => {
+      items.push({
+        label: item.region_alias,
+        key: item.region_name,
+        children: <SettingFrom {...this.props} regionName={item.region_name} />,
       })
     })
-  }
-  handleSave = (values) => {
-    Modal.confirm({
-      title: '确认保存',
-      content: '确定要保存设置吗？',
-      onOk: () => {
-        updatePricingConfig({
-          cpu_price_per_core: Number(values.cpuPrice),
-          memory_price_per_mb: Number(values.memoryPrice),
-          storage_price_per_gb: Number(values.storagePrice),
-          network_price_per_mb: Number(values.networkPrice)
-        }).then(() => {
-          notification.success({
-            message: '保存成功',
-            description: '设置已保存',
-          });
-          this.getPricingConfig();
-        })
-      },
-      onCancel: () => {
-      },
-    });
-  }
-  render() {
-    console.log(this.state.cpuPrice, "this.state.cpuPrice");
     return (
-      <div>
-        <h2>成本设置</h2>
-        <Spin spinning={this.state.loading} tip="加载中...">
-          <Form
-            key={this.state.loading}
-            layout="vertical"
-            onFinish={this.handleSave}
-            initialValues={{
-              memoryPrice: this.state.memoryPrice,
-              cpuPrice: this.state.cpuPrice,
-              storagePrice: this.state.storagePrice,
-              networkPrice: this.state.networkPrice
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item label="内存单价(元/小时)" name="memoryPrice" style={{ flex: 1, marginRight: '10px' }}>
-                <InputNumber placeholder="请输入内存单价" style={{ width: '60%' }} stringMode/>
-              </Form.Item>
-              <Form.Item label="CPU单价(元/小时)" name="cpuPrice" style={{ flex: 1 }}>
-                <InputNumber placeholder="请输入CPU单价" style={{ width: '60%' }} stringMode/>
-              </Form.Item>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item label="存储单价(元/小时)" name="storagePrice" style={{ flex: 1, marginRight: '10px' }}>
-                <InputNumber placeholder="请输入存储单价" style={{ width: '60%' }} stringMode/>
-              </Form.Item>
-              <Form.Item label="流量单价(元/MB)" name="networkPrice" style={{ flex: 1 }}>
-                <InputNumber placeholder="请输入流量单价" style={{ width: '60%' }} stringMode/>
-              </Form.Item>
-            </div>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">保存设置</Button>
-            </Form.Item>
-          </Form>
-        </Spin>
-      </div>
+      <>
+        <Tabs items={items} />
+      </>
     )
   }
 }

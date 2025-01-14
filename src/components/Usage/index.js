@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Typography, Card, Table, DatePicker, Select, Button, notification, Skeleton } from 'antd';
 import { getCostSummary, getServiceCostSummary } from '@/api';
+import { getNamespace } from '@/utils/global';
 import moment from 'moment';
 import styles from './index.less';
 
@@ -10,7 +11,7 @@ const { RangePicker } = DatePicker;
 export default class UsageDetails extends Component {
   constructor(props) {
     super(props);
-    const namespaceStr = this.props.baseInfo.currentUser.teams?.map(item => item.namespace).join(',') || ''
+    const namespaceStr = getNamespace(props?.baseInfo) || '';
     this.state = {
       dateRange: [],
       selectedProject: '',
@@ -21,7 +22,7 @@ export default class UsageDetails extends Component {
       serviceCostPage: 1,
       serviceCostPageSize: 5,
       serviceCostTotal: 0,
-      namespace: namespaceStr || '',
+      namespace: namespaceStr.length > 0 ? namespaceStr.join(',') : '',
     };
   }
 

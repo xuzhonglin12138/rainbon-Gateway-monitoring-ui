@@ -17,7 +17,7 @@ import {
 } from '@/api';
 import styles from './index.less';
 import moment from 'moment';
-import { getNamespace } from '@/utils/global';
+// import { getNamespace } from '@/utils/global';
 import DetailModal from '@/components/DetailModal';
 import RechargeModal from '@/components/RechargeModal';
 
@@ -28,6 +28,7 @@ export default class Recharge extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      activeKey: 'expense',
       expenseList: [],
       rechargeList: [],
       dateRange: [],
@@ -46,8 +47,12 @@ export default class Recharge extends Component {
   }
 
   componentDidMount() {
-    this.fetchExpenseList(true);
-    this.fetchRechargeList();
+    const { activeKey } = this.state;
+    if (activeKey === 'expense') {
+      this.fetchExpenseList(true);
+    } else {
+      this.fetchRechargeList();
+    }
   }
   fetchRechargeList = () => {
     this.setState({ rechargeLoading: true });
@@ -60,7 +65,6 @@ export default class Recharge extends Component {
       page_size: rechargePageSize || 10,
     }
     getRechargeList(params).then(res => {
-      console.log(res);
       this.setState({ rechargeList: res.data.records, rechargeTotal: res.data.total, rechargeLoading: false });
     }).catch(err => {
       notification.error({
@@ -71,17 +75,18 @@ export default class Recharge extends Component {
     });
   }
   fetchExpenseList = (bool) => {
+
     this.setState({ expenseLoading: true });
     const { dateRange, selectedProject, expensePage, expensePageSize } = this.state;
-    const { baseInfo } = this.props;
-    const namespaceArr = getNamespace(baseInfo);
+    // const { baseInfo } = this.props;
+    // const namespaceArr = getNamespace(baseInfo);
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       page: expensePage || 1,
       page_size: expensePageSize || 5,
-      namespace: namespaceArr.length > 0 ? namespaceArr.join(',') : ''
+      // namespace: namespaceArr.length > 0 ? namespaceArr.join(',') : ''
     }
     getAppCostSummary(params).then(res => {
       let projectList = [];
@@ -486,12 +491,19 @@ export default class Recharge extends Component {
 
         <div className={styles.tabContainer}>
           <Tabs
-            defaultActiveKey="expense"
+            activeKey={this.state.activeKey}
             items={items}
-            onChange={() => {
+            onChange={(key) => {
               this.setState({
+                activeKey: key,
                 dateRange: [],
                 dateValue: []
+              }, () => {
+                if (key === 'expense') {
+                  this.fetchExpenseList(true);
+                } else {
+                  this.fetchRechargeList();
+                }
               });
             }}
           />

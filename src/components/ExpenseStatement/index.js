@@ -10,6 +10,7 @@ const { RangePicker } = DatePicker;
 export default class index extends Component {
   constructor(props) {
     super(props)
+    const { baseInfo } = props || {};
     this.state = {
       dateValue: [],
       expenseLoading: false,
@@ -21,12 +22,13 @@ export default class index extends Component {
       expenseSearchText: '',
       namespaceList: [],
       namespace: '',
+      cluster_info: baseInfo?.cluster_info || {},
     }
   }
   componentDidMount() {
-    this.fetchExpenseList(true);
+    this.fetchExpenseList();
   }
-  fetchExpenseList = (bool) => {
+  fetchExpenseList = () => {
     this.setState({ expenseLoading: true });
     const { dateRange, expensePage, expensePageSize, namespace } = this.state;
     getDailyBillList({
@@ -36,27 +38,6 @@ export default class index extends Component {
       namespace: namespace || '',
       page_size: expensePageSize || 5,
     }).then(res => {
-      let namespaceList = [];
-      if (res?.data?.bills?.length > 0 && bool) {
-        const seenNamespace = new Set();
-        namespaceList = res.data.bills.reduce((acc, item) => {
-          if (!seenNamespace.has(item.namespace)) {
-            seenNamespace.add(item.namespace);
-            acc.push({
-              value: item.namespace,
-              label: item.namespace
-            });
-          }
-          return acc;
-        }, []);
-        namespaceList.unshift({
-          value: '',
-          label: '所有命名空间'
-        });
-        this.setState({
-          namespaceList: namespaceList,
-        })
-      }
       this.setState({ expenseList: res.data.bills, expenseTotal: res.data.total, expenseLoading: false });
     }).catch(err => {
       notification.error({
@@ -84,7 +65,7 @@ export default class index extends Component {
       dateRange: [],
       dateValue: [],
       expensePage: 1,
-      namespace: '',
+      namespace: 'all',
     }, () => {
       this.fetchExpenseList();
     });
@@ -136,8 +117,21 @@ export default class index extends Component {
         dataIndex: 'total_cost',
         key: 'total_cost',
       },
-
     ]
+    const { cluster_info } = this.state;
+    const items = []
+    if (cluster_info.length > 0) {
+      cluster_info.forEach((item) => {
+        items.push({
+          label: item.region_alias,
+          value: item.region_name,
+        })
+      })
+    }
+    items.unshift({
+      label: '所有集群',
+      value: '',
+    })
     return (
       <div>
         <div className={styles.container}>
@@ -152,11 +146,11 @@ export default class index extends Component {
               </Col>
               <Col span={10}>
                 <Select
-                  style={{ width: 200 }}
-                  placeholder="选择命名空间"
+                  style={{ width: 200, marginLeft: 10 }}
+                  placeholder="选择集群"
                   value={this.state.namespace}
                   onChange={this.onNamespaceChange}
-                  options={this.state.namespaceList}
+                  options={items}
                 />
               </Col>
               <Col span={8} style={{ textAlign: 'right' }}>
