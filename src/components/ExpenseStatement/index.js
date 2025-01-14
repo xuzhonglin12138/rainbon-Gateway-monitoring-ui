@@ -19,10 +19,9 @@ export default class index extends Component {
       expensePageSize: 5,
       expenseTotal: 0,
       dateRange: [],
-      expenseSearchText: '',
-      namespaceList: [],
-      namespace: '',
-      cluster_info: baseInfo?.cluster_info || {},
+      region: '',
+      userId: '',
+      cluster_info: baseInfo?.cluster_info || [],
     }
   }
   componentDidMount() {
@@ -30,15 +29,20 @@ export default class index extends Component {
   }
   fetchExpenseList = () => {
     this.setState({ expenseLoading: true });
-    const { dateRange, expensePage, expensePageSize, namespace } = this.state;
+    const { dateRange, expensePage, expensePageSize, region, userId } = this.state;
     getDailyBillList({
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD') : '',
       page: expensePage || 1,
-      namespace: namespace || '',
+      region_name: region || '',
+      user_id: userId || '',
       page_size: expensePageSize || 5,
     }).then(res => {
-      this.setState({ expenseList: res.data.bills, expenseTotal: res.data.total, expenseLoading: false });
+      this.setState({
+        expenseList: res.data.bills,
+        expenseTotal: res.data.total,
+        expenseLoading: false
+      });
     }).catch(err => {
       notification.error({
         message: '获取费用账单失败',
@@ -65,13 +69,17 @@ export default class index extends Component {
       dateRange: [],
       dateValue: [],
       expensePage: 1,
-      namespace: 'all',
+      region: '',
+      userId: '',
     }, () => {
       this.fetchExpenseList();
     });
   };
-  onNamespaceChange = (value) => {
-    this.setState({ namespace: value });
+  onRegionChange = (value) => {
+    this.setState({ region: value });
+  };
+  onUserChange = (value) => {
+    this.setState({ userId: value });
   };
 
   render() {
@@ -82,9 +90,14 @@ export default class index extends Component {
         key: 'order_no',
       },
       {
-        title: '命名空间',
-        dataIndex: 'namespace',
-        key: 'namespace',
+        title: '用户名',
+        dataIndex: 'username',
+        key: 'username',
+      },
+      {
+        title: '集群名称',
+        dataIndex: 'region_name',
+        key: 'region_name',
       },
       {
         title: '账单日期',
@@ -118,20 +131,26 @@ export default class index extends Component {
         key: 'total_cost',
       },
     ]
-    const { cluster_info } = this.state;
-    const items = []
-    if (cluster_info.length > 0) {
-      cluster_info.forEach((item) => {
-        items.push({
-          label: item.region_alias,
-          value: item.region_name,
+    const { cluster_info, expenseList } = this.state;
+    const regionOptions = [
+      { label: '所有集群', value: '' },
+      ...(cluster_info || []).map(item => ({
+        label: item.region_alias,
+        value: item.region_name
+      }))
+    ];
+    const userOptions = [
+      { label: '所有用户', value: '' },
+      ...Array.from(
+        new Set(expenseList.map(item => JSON.stringify({ id: item.user_id, name: item.username })))
+      ).map(userStr => {
+          const user = JSON.parse(userStr);
+          return {
+            label: user.name,
+            value: user.id
+          };
         })
-      })
-    }
-    items.unshift({
-      label: '所有集群',
-      value: '',
-    })
+    ];
     return (
       <div>
         <div className={styles.container}>
@@ -144,16 +163,25 @@ export default class index extends Component {
                   onChange={this.onDateChange}
                 />
               </Col>
-              <Col span={10}>
+              <Col span={6}>
                 <Select
                   style={{ width: 200, marginLeft: 10 }}
                   placeholder="选择集群"
-                  value={this.state.namespace}
-                  onChange={this.onNamespaceChange}
-                  options={items}
+                  value={this.state.region}
+                  onChange={this.onRegionChange}
+                  options={regionOptions}
                 />
               </Col>
-              <Col span={8} style={{ textAlign: 'right' }}>
+              <Col span={6}>
+                <Select
+                  style={{ width: 200, marginLeft: 10 }}
+                  placeholder="选择用户"
+                  value={this.state.userId}
+                  onChange={this.onUserChange}
+                  options={userOptions}
+                />
+              </Col>
+              <Col span={6} style={{ textAlign: 'right' }}>
                 <Button type="primary" onClick={this.handleExpenseSearch} style={{ marginRight: 10 }}>搜索</Button>
                 <Button onClick={this.handleExpenseReset}>重置</Button>
               </Col>
