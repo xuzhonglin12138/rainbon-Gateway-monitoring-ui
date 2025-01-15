@@ -22,11 +22,36 @@ export default class index extends Component {
       region: '',
       userId: '',
       cluster_info: baseInfo?.cluster_info || [],
+      userList: [],
+      loading: true,
     }
   }
   componentDidMount() {
     this.fetchExpenseList();
+    this.loadUser();
   }
+  loadUser = () => {
+    const {
+      dispatch,
+      baseInfo: {
+        currentUser
+      }
+    } = this.props;
+    dispatch({
+      type: 'global/fetchEnterpriseUsers',
+      payload: {
+        enterprise_id: currentUser.enterprise_id,
+        page: 1,
+        page_size: 1000,
+        name: '',
+      },
+      callback: res => {
+        if (res) {
+          this.setState({ userList: res.list, loading: false });
+        }
+      }
+    });
+  };
   fetchExpenseList = () => {
     this.setState({ expenseLoading: true });
     const { dateRange, expensePage, expensePageSize, region, userId } = this.state;
@@ -55,7 +80,7 @@ export default class index extends Component {
     if (!dates || dates.length === 0) {
       this.setState({ dateRange: [], dateValue: [] });
     } else {
-      const formattedDates = dates.map(date => date.format('YYYY-MM-DD'));
+      const formattedDates = (dates || []).map(date => date.format('YYYY-MM-DD'));
       this.setState({ dateRange: formattedDates, dateValue: dates });
     }
   };
@@ -107,31 +132,36 @@ export default class index extends Component {
       },
       {
         title: 'CPU',
-        dataIndex: 'cpu_usage',
-        key: 'cpu_usage',
+        dataIndex: 'cpu_cost',
+        key: 'cpu_cost',
+        render: (text) => <span>¥{(text / 100).toFixed(2)}</span>, 
       },
       {
         title: '内存',
-        dataIndex: 'memory_usage',
-        key: 'memory_usage',
+        dataIndex: 'memory_cost',
+        key: 'memory_cost',
+        render: (text) => <span>¥{(text / 100).toFixed(2)}</span>,
       },
       {
         title: '存储',
-        dataIndex: 'storage_usage',
-        key: 'storage_usage',
+        dataIndex: 'storage_cost',
+        key: 'storage_cost',
+        render: (text) => <span>¥{(text / 100).toFixed(2)}</span>,
       },
       {
         title: '网络',
-        dataIndex: 'network_usage',
-        key: 'network_usage',
+        dataIndex: 'network_cost',
+        key: 'network_cost',
+        render: (text) => <span>¥{(text / 100).toFixed(2)}</span>,
       },
       {
         title: '总金额',
         dataIndex: 'total_cost',
         key: 'total_cost',
+        render: (text) => <span>¥{(text / 100).toFixed(2)}</span>,
       },
     ]
-    const { cluster_info, expenseList } = this.state;
+    const { cluster_info, userList } = this.state;
     const regionOptions = [
       { label: '所有集群', value: '' },
       ...(cluster_info || []).map(item => ({
@@ -141,15 +171,10 @@ export default class index extends Component {
     ];
     const userOptions = [
       { label: '所有用户', value: '' },
-      ...Array.from(
-        new Set(expenseList.map(item => JSON.stringify({ id: item.user_id, name: item.username })))
-      ).map(userStr => {
-          const user = JSON.parse(userStr);
-          return {
-            label: user.name,
-            value: user.id
-          };
-        })
+      ...(userList || []).map(item => ({
+        label: item.nick_name,
+        value: item.user_id
+      }))
     ];
     return (
       <div>
@@ -174,6 +199,7 @@ export default class index extends Component {
               </Col>
               <Col span={6}>
                 <Select
+                  loading={this.state.loading}
                   style={{ width: 200, marginLeft: 10 }}
                   placeholder="选择用户"
                   value={this.state.userId}

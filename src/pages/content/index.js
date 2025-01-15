@@ -3,6 +3,7 @@ import { Menu } from 'antd';
 import OrderManagement from '@/components/OrderManagement'
 import ExpenseStatement from '@/components/ExpenseStatement'
 import CostSetting from '@/components/CostSetting'
+import QuotaSetting from '@/components/QuotaSetting'
 import styles from './index.less'
 
 
@@ -35,6 +36,10 @@ export default class index extends Component {
         label: '成本设置',
         key: 'costSetting',
       },
+      {
+        label: '额度设置',
+        key: 'quotaSetting',
+      },
 
     ]
     return (
@@ -53,6 +58,8 @@ export default class index extends Component {
           {activeKey === 'orderManagement' && <OrderManagement {...this.props} />}
           {activeKey === 'expenseStatement' && <ExpenseStatement {...this.props} />}
           {activeKey === 'costSetting' && <CostSetting {...this.props} />}
+          {activeKey === 'quotaSetting' && <QuotaSetting {...this.props} />}
+
         </div>
       </div>
     )

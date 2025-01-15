@@ -12,6 +12,7 @@ const DetailModal = ({ visible, onClose, detailData }) => {
       onCancel={onClose}
       width={1200}
       footer={null}
+      closable={false}
     >
       <div>
         <div className={styles.summary}>

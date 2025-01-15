@@ -37,6 +37,7 @@ export default class index extends Component {
     Modal.confirm({
       title: '确认保存',
       content: '确定要保存设置吗？',
+      closable: false,
       onOk: () => {
         updatePricingConfig({
           cpu_price_per_core: Number(values.cpuPrice),

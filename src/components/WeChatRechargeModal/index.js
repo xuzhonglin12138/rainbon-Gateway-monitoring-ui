@@ -69,6 +69,7 @@ export default class WeChatRechargeModal extends Component {
         title="微信充值"
         visible={visible}
         onCancel={onClose}
+        closable={false}
         footer={[
           <Button key="cancel" onClick={onClose}>
             取消
