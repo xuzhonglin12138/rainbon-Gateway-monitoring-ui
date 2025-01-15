@@ -30,6 +30,7 @@ const RechargeModal = ({ visible, onClose, orderDetails }) => {
       onCancel={onClose}
       footer={null}
       width={1200}
+      closable={false}
     >
       <Descriptions bordered>
         <Descriptions.Item label="订单号">{orderDetails?.order_no}</Descriptions.Item>
