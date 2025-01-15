@@ -38,23 +38,23 @@ const DetailModal = ({ visible, onClose, detailData }) => {
         </div>
         <Table
           columns={[
-            { title: '组件名称', dataIndex: 'service_id', key: 'service_id' },
-            { title: 'CPU(Core)', dataIndex: 'cpu', key: 'cpu' },
+            { title: '组件名称', dataIndex: 'service_name', key: 'service_name' },
+            { title: 'CPU(Core)', dataIndex: 'cpu_usage', key: 'cpu_usage' },
             { title: 'CPU金额(元)', dataIndex: 'cpu_cost', key: 'cpu_cost', 
               render: (text) => `-¥${(text / 100).toFixed(2)}` },
-            { title: '内存(MB)', dataIndex: 'memory', key: 'memory' },
+            { title: '内存(MB)', dataIndex: 'memory_usage', key: 'memory_usage' },
             { title: '内存金额(元)', dataIndex: 'memory_cost', key: 'memory_cost', 
               render: (text) => `-¥${(text / 100).toFixed(2)}` },
-            { title: '存储(GB)', dataIndex: 'storage', key: 'storage' },
+            { title: '存储(GB)', dataIndex: 'storage_usage', key: 'storage_usage' },
             { title: '存储金额(元)', dataIndex: 'storage_cost', key: 'storage_cost', 
               render: (text) => `-¥${(text / 100).toFixed(2)}` },
-            { title: '网络(MB)', dataIndex: 'network_io', key: 'network_io' },
+            { title: '网络(MB)', dataIndex: 'network_usage', key: 'network_usage' },
             { title: '网络金额(元)', dataIndex: 'network_cost', key: 'network_cost', 
               render: (text) => `-¥${(text / 100).toFixed(2)}` },
             { title: '总金额(元)', dataIndex: 'total_cost', key: 'total_cost', 
               render: (text) => `-¥${(text / 100).toFixed(2)}` },
           ]}
-          dataSource={detailData.service_costs}
+          dataSource={detailData.component_details}
           rowKey="componentName"
           pagination={false}
         />
