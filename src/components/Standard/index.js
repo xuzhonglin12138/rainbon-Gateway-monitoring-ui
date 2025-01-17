@@ -24,7 +24,10 @@ export default class Recharge extends Component {
   }
   // 获取价格配置
   getPricingConfig = () => {
-    getPricingConfig().then(res => {
+    const { globalUtile } = this.props;
+    getPricingConfig({
+      region_name: globalUtile.getCurrRegionName()
+    }).then(res => {
       this.setState({
         pricingConfig: res.data,
         pricingLoading: false

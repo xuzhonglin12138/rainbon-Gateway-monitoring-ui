@@ -23,7 +23,9 @@ export default class index extends Component {
     this.setState({
       loading: true
     })
-    getPricingConfig().then(res => {      
+    getPricingConfig({
+      region_name: this.state.regionName
+    }).then(res => {      
       this.setState({
         cpuPrice: res.data.cpu_price_per_core,
         memoryPrice: res.data.memory_price_per_mb,
@@ -43,7 +45,8 @@ export default class index extends Component {
           cpu_price_per_core: Number(values.cpuPrice),
           memory_price_per_mb: Number(values.memoryPrice),
           storage_price_per_gb: Number(values.storagePrice),
-          network_price_per_mb: Number(values.networkPrice)
+          network_price_per_mb: Number(values.networkPrice),
+          region_name: this.state.regionName
         }).then(() => {
           notification.success({
             message: '保存成功',

@@ -27,20 +27,21 @@ export default class UsageDetails extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props, 'props')
     this.getCostSummary();
     this.getServiceCostSummary(true);
   }
   getServiceCostSummary = (bool) => {
     this.setState({ serviceCostLoading: true });
     const { dateRange, selectedProject, serviceCostPage, serviceCostPageSize, namespace } = this.state;
+    const { globalUtile } = this.props;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       namespace: namespace || '',
       page: serviceCostPage,
-      page_size: serviceCostPageSize
+      page_size: serviceCostPageSize,
+      region_name: globalUtile.getCurrRegionName()
     }
     getServiceCostSummary(params).then(res => {
       let newProjectList = [];
@@ -80,13 +81,15 @@ export default class UsageDetails extends Component {
 
   // 获取费用汇总
   getCostSummary = () => {
+    const { globalUtile } = this.props;
     this.setState({ summaryLoading: true });
     const { dateRange, selectedProject, namespace } = this.state;
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
-      namespace: namespace || ''
+      namespace: namespace || '',
+      region_name: globalUtile.getCurrRegionName()
     }
     getCostSummary(params).then(res => {
 

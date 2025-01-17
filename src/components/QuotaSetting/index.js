@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { Table, Button, Modal, Input, Form, InputNumber, Row, Col } from 'antd'
+import { Table, Button, Modal, Input, Form, InputNumber, Row, Col, notification } from 'antd'
+import { manualRecharge } from '@/api'
 import moment from 'moment'
 
 export default class index extends Component {
@@ -56,9 +57,24 @@ export default class index extends Component {
   handleModalOk = (values) => {
     const { amount, remark } = values;
     const { selectedUser } = this.state;
-    // 在这里处理充值逻辑
-    console.log(`给用户 ${selectedUser.nick_name} 充值金额: ${amount}, 备注: ${remark}`);
-    this.setState({ modalVisible: false });
+    manualRecharge({
+      user_id: selectedUser.user_id,
+      amount: amount * 100,
+      description: remark,
+    }).then(res => {
+      if (res) {
+        this.setState({ modalVisible: false });
+        notification.success({
+          message: '充值成功',
+        });
+      }
+    }).catch(() => {
+      notification.error({
+        message: '充值失败',
+        description: '请稍后再试'
+      });
+      this.setState({ modalVisible: false });
+    })
   }
 
   handleModalCancel = () => {
@@ -156,7 +172,7 @@ export default class index extends Component {
       <>
         <Row style={{ marginBottom: 20 }}>
           <Col span={20}>
-            <Input placeholder="请输入用户名称" onChange={this.onNameChange} value={name} style={{ width: 250 }}/>
+            <Input placeholder="请输入用户名称" onChange={this.onNameChange} value={name} style={{ width: 250 }} />
           </Col>
           <Col span={4} style={{ textAlign: 'right' }}>
             <Button type="primary" onClick={this.handleExpenseSearch} style={{ marginRight: 10 }}>搜索</Button>

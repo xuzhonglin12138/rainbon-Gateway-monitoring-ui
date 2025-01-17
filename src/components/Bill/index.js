@@ -78,7 +78,7 @@ export default class Recharge extends Component {
 
     this.setState({ expenseLoading: true });
     const { dateRange, selectedProject, expensePage, expensePageSize } = this.state;
-    // const { baseInfo } = this.props;
+    const { globalUtile } = this.props;
     // const namespaceArr = getNamespace(baseInfo);
     const params = {
       start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
@@ -87,6 +87,7 @@ export default class Recharge extends Component {
       page: expensePage || 1,
       page_size: expensePageSize || 5,
       // namespace: namespaceArr.length > 0 ? namespaceArr.join(',') : ''
+      region_name: globalUtile.getCurrRegionName()
     }
     getAppCostSummary(params).then(res => {
       let projectList = [];

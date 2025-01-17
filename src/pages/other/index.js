@@ -4,6 +4,7 @@ import Usage from '../../components/Usage'
 import Bill from '../../components/Bill'
 import Standard from '../../components/Standard'
 import Recharge from '../../components/Recharge'
+import { syncData } from '@/api'
 import styles from './index.less'
 
 
@@ -13,6 +14,20 @@ export default class index extends Component {
     this.state = {
       activeKey: 'recharge',
     }
+  }
+
+  componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch && dispatch({
+      type: 'global/fetchTeamDetails',
+      callback: (res) => {
+        if(res && res.bean){
+          syncData(res.bean).then(Response => {
+            console.log(Response, '数据同步成功');
+          })
+        }
+      }
+    })
   }
 
   handleClick = (e) => {
