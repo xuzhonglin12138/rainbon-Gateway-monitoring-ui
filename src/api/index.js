@@ -71,11 +71,12 @@ export async function getBillDetails(params) {
 }
 
 // 获取当前的资源价格配置
-export async function getPricingConfig() {
+export async function getPricingConfig(params) {
   return request(
     `/api/v1/pricing`,
     {
-      method: 'get'
+      method: 'get',
+      params: params
     }
   );
 }
@@ -195,6 +196,35 @@ export async function getAllRechargeList(params) {
     {
       method: 'get',
       params: params
+    }
+  );
+}
+// 管理员手动充值
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | user_id | int    | 是   | 用户ID |
+// | amount | int    | 是   | 充值金额，单位分 |
+// | description | string | 否   | 充值描述 |
+export async function manualRecharge(data) {
+  return request(
+    `/api/v1/admin/recharge/manual`,
+    {
+      method: 'post',
+      data: data
+    }
+  );
+}
+
+// 同步数据
+// | 参数名   | 类型   | 必填 | 说明   |
+// | -------- | ------ | ---- | ------ |
+// | region_name | string | 是   | 区域名称 |
+export async function syncData(data) {
+  return request(
+    `/api/v1/user/sync/data`,
+    {
+      method: 'post',
+      data: JSON.stringify(data)
     }
   );
 }
