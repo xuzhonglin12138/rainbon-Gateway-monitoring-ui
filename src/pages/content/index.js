@@ -4,6 +4,7 @@ import OrderManagement from '@/components/OrderManagement'
 import ExpenseStatement from '@/components/ExpenseStatement'
 import CostSetting from '@/components/CostSetting'
 import QuotaSetting from '@/components/QuotaSetting'
+import AlarmSetting from '@/components/AlarmSetting'
 import styles from './index.less'
 
 
@@ -40,7 +41,10 @@ export default class index extends Component {
         label: '额度设置',
         key: 'quotaSetting',
       },
-
+      {
+        label: '告警设置',
+        key: 'alarmSetting',
+      }
     ]
     return (
       <div className={styles.container}>
@@ -59,7 +63,7 @@ export default class index extends Component {
           {activeKey === 'expenseStatement' && <ExpenseStatement {...this.props} />}
           {activeKey === 'costSetting' && <CostSetting {...this.props} />}
           {activeKey === 'quotaSetting' && <QuotaSetting {...this.props} />}
-
+          {activeKey === 'alarmSetting' && <AlarmSetting {...this.props} />}
         </div>
       </div>
     )
