@@ -3,7 +3,7 @@ export const getNamespace = (baseInfo = {}) => {
   const teams = currentUser?.teams || [];
   let namespaceArr = [];
   teams.forEach(team => {
-    if (team.team_id === currentUser.user_id) {
+    if (team.is_team_owner) {
       namespaceArr.push(team.namespace);
     } else {
       return '';
