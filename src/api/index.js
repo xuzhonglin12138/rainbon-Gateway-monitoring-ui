@@ -232,7 +232,7 @@ export async function syncData(data) {
 // 获取告警设置信息
 export async function getAlarmSettingInfo() {
   return request(
-    `/api/v1/admin/sms/config`,
+    `/api/v1/admin/config`,
     {
       method: 'get'
     }
@@ -242,7 +242,7 @@ export async function getAlarmSettingInfo() {
 // 设置告警信息
 export async function upAlarmSettingInfo(data) {
   return request(
-    `/api/v1/admin/sms/config`,
+    `/api/v1/admin/config`,
     {
       method: 'put',
       data: data

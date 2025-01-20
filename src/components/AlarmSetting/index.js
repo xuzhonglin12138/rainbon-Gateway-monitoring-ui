@@ -22,38 +22,31 @@ export default class index extends Component {
     this.setState({ loading: true });
     getAlarmSettingInfo().then(res => {
       if (res?.data) {
-        const { 
-          enabled,
-          minBalance,
-          remainDay,
-          provider,
-          access_key,
-          secret_key,
-          template_low_balance,
-          template_overdue,
-          template_cleanup,
-          template_recovery,
-        } = res.data.data;
-        // 确保 enabled 为布尔值
-        const smsEnabled = !!enabled;  // 将 enabled 转换为布尔值
-        // 先更新 state 中的开关状态
+        const { sms, threshold } = res.data.data;
+        
+        // 更新开关状态
         this.setState({ 
-          smsEnabled,  // 直接使用布尔值
+          smsEnabled: sms.enabled,  // 直接使用 enabled 值
           loading: false 
         });
 
-        // 再设置表单值
+        // 设置表单值
         this.state.formRef.current.setFieldsValue({
-          enabled: smsEnabled,  // 确保 enabled 为布尔值
-          minBalance: minBalance || 0,
-          remainDay: remainDay || 1,
-          provider: provider || 'aliyun',
-          access_key,
-          secret_key,
-          template_low_balance,
-          template_overdue,
-          template_cleanup,
-          template_recovery,
+          // SMS 配置
+          enabled: sms.enabled,
+          provider: sms.provider,
+          access_key: sms.access_key,
+          secret_key: sms.secret_key,
+          template_low_balance: sms.template_low_balance,
+          template_overdue: sms.template_overdue,
+          template_cleanup: sms.template_cleanup,
+          template_recovery: sms.template_recovery,
+          
+          // 阈值配置
+          check_interval: threshold.check_interval,
+          low_balance_threshold: threshold.low_balance_threshold,
+          overdue_cleanup_days: threshold.overdue_cleanup_days,
+          notify_interval: threshold.notify_interval
         });
       } else {
         this.setState({ 
@@ -78,8 +71,32 @@ export default class index extends Component {
   // 处理表单提交
   handleModalOk = async (values) => {
     this.setState({ loading: true });
-    values.sign_name = '好雨科技'
-    upAlarmSettingInfo(values).then(() => {
+    
+    // 获取当前表单所有值
+    const currentValues = this.state.formRef.current.getFieldsValue();
+    
+    // 构造请求参数
+    const params = {
+      sms: {
+        provider: currentValues.provider,
+        access_key: currentValues.access_key,
+        secret_key: currentValues.secret_key,
+        sign_name: '好雨科技',  // 固定值
+        template_low_balance: currentValues.template_low_balance,
+        template_overdue: currentValues.template_overdue,
+        template_cleanup: currentValues.template_cleanup,
+        template_recovery: currentValues.template_recovery,
+        enabled: values.enabled  // 只更新 enabled 状态
+      },
+      threshold: {
+        check_interval: values.check_interval,
+        low_balance_threshold: values.low_balance_threshold,
+        overdue_cleanup_days: values.overdue_cleanup_days,
+        notify_interval: values.notify_interval
+      }
+    };
+
+    upAlarmSettingInfo(params).then(() => {
       notification.success({
         message: '保存成功'
       });
@@ -97,6 +114,7 @@ export default class index extends Component {
   // 处理 Switch 状态变化
   handleSwitchChange = (checked) => {
     this.setState({ smsEnabled: checked });
+    // 只更新 enabled 状态，不影响其他字段
     this.state.formRef.current.setFieldsValue({ enabled: checked });
   }
 
@@ -111,33 +129,61 @@ export default class index extends Component {
           onFinish={this.handleModalOk}
           disabled={loading}
         >
+          {/* 阈值配置 */}
           <Form.Item
-            label="最小余额"
-            name="minBalance"
-            rules={[{ required: true, message: '请输入最小余额' }]}
+            label="检查间隔"
+            name="check_interval"
+            rules={[{ required: true, message: '请输入检查间隔' }]}
+          >
+            <InputNumber
+              min={1}
+              style={{ width: '100%' }}
+              placeholder="请输入检查间隔"
+              addonAfter="小时"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="余额阈值"
+            name="low_balance_threshold"
+            rules={[{ required: true, message: '请输入余额阈值' }]}
           >
             <InputNumber
               min={0}
               step={1}
               style={{ width: '100%' }}
-              placeholder="请输入最小余额"
-              addonAfter="¥"
+              placeholder="请输入余额阈值"
+              addonAfter="元"
             />
           </Form.Item>
 
           <Form.Item
-            label="欠费宽限期"
-            name="remainDay"
-            rules={[{ required: true, message: '请输入欠费宽限期' }]}
+            label="清理宽限期"
+            name="overdue_cleanup_days"
+            rules={[{ required: true, message: '请输入清理宽限期' }]}
           >
             <InputNumber
               min={1}
               style={{ width: '100%' }}
-              placeholder="请输入欠费宽限期"
+              placeholder="请输入清理宽限期"
               addonAfter="天"
             />
           </Form.Item>
 
+          <Form.Item
+            label="通知间隔"
+            name="notify_interval"
+            rules={[{ required: true, message: '请输入通知间隔' }]}
+          >
+            <InputNumber
+              min={1}
+              style={{ width: '100%' }}
+              placeholder="请输入通知间隔"
+              addonAfter="小时"
+            />
+          </Form.Item>
+
+          {/* 短信配置 */}
           <Form.Item
             label="是否启用短信告警"
             name="enabled"
