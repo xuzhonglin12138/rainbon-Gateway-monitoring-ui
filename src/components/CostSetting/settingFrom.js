@@ -28,7 +28,7 @@ export default class index extends Component {
     }).then(res => {      
       this.setState({
         cpuPrice: res.data.cpu_price_per_core,
-        memoryPrice: res.data.memory_price_per_mb,
+        memoryPrice: res.data.memory_price_per_gb,
         storagePrice: res.data.storage_price_per_gb,
         networkPrice: res.data.network_price_per_mb,
         loading: false
@@ -43,7 +43,7 @@ export default class index extends Component {
       onOk: () => {
         updatePricingConfig({
           cpu_price_per_core: Number(values.cpuPrice),
-          memory_price_per_mb: Number(values.memoryPrice),
+          memory_price_per_gb: Number(values.memoryPrice),
           storage_price_per_gb: Number(values.storagePrice),
           network_price_per_mb: Number(values.networkPrice),
           region_name: this.state.regionName

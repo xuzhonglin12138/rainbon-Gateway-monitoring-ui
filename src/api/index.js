@@ -84,7 +84,7 @@ export async function getPricingConfig(params) {
 // | 参数名   | 类型   | 必填 | 说明   |
 // | -------- | ------ | ---- | ------ |
 // | cpu_price_per_core | float | 否   | CPU单价(元/小时) |
-// | memory_price_per_mb | float | 否   | 内存单价(元/小时) |
+// | memory_price_per_gb | float | 否   | 内存单价(元/小时) |
 // | storage_price_per_gb | float | 否   | 存储单价(元/小时) |
 // | network_price_per_mb | float | 否   | 流量单价(元/MB) |
 export async function updatePricingConfig(data) {
