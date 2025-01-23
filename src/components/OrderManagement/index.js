@@ -124,7 +124,7 @@ export default class OrderManagement extends Component {
         dataIndex: 'pay_method',
         key: 'pay_method',
         render: (text) => {
-          return <Tag>{text == 'Manual' ? '后台支付' : '微信支付'}</Tag>;
+          return <Tag>{text == 'Manual' ? '后台充值' : '微信支付'}</Tag>;
         },
       },
       {

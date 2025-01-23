@@ -17,23 +17,23 @@ const DetailModal = ({ visible, onClose, detailData }) => {
       <div>
         <div className={styles.summary}>
           <div>
-            <p>总金额（元）</p>
+            <div>总金额（元）</div>
             <p>-¥{(detailData?.summary?.total_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
-            <p>CPU费用(元)</p>
+            <div>CPU费用(元)</div>
             <p>-¥{(detailData?.summary?.cpu_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
-            <p>内存费用(元)</p>
+            <div>内存费用(元)</div>
             <p>-¥{(detailData?.summary?.memory_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
-            <p>存储费用(元)</p>
+            <div>存储费用(元)</div>
             <p>-¥{(detailData?.summary?.storage_cost / 100).toFixed(2) || 0}</p>
           </div>
           <div>
-            <p>网络费用(元)</p>
+            <div>网络费用(元)</div>
             <p>-¥{(detailData?.summary?.network_cost / 100).toFixed(2) || 0}</p>
           </div>
         </div>

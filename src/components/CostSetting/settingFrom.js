@@ -75,18 +75,18 @@ export default class index extends Component {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item label="内存单价(元/小时)" name="memoryPrice" style={{ flex: 1, marginRight: '10px' }}>
+              <Form.Item label="内存单价(GB/小时)" name="memoryPrice" style={{ flex: 1, marginRight: '10px' }}>
                 <InputNumber placeholder="请输入内存单价" style={{ width: '60%' }} stringMode/>
               </Form.Item>
-              <Form.Item label="CPU单价(元/小时)" name="cpuPrice" style={{ flex: 1 }}>
+              <Form.Item label="CPU单价(GB/小时)" name="cpuPrice" style={{ flex: 1 }}>
                 <InputNumber placeholder="请输入CPU单价" style={{ width: '60%' }} stringMode/>
               </Form.Item>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item label="存储单价(元/小时)" name="storagePrice" style={{ flex: 1, marginRight: '10px' }}>
+              <Form.Item label="存储单价(GB/小时)" name="storagePrice" style={{ flex: 1, marginRight: '10px' }}>
                 <InputNumber placeholder="请输入存储单价" style={{ width: '60%' }} stringMode/>
               </Form.Item>
-              <Form.Item label="流量单价(元/MB)" name="networkPrice" style={{ flex: 1 }}>
+              <Form.Item label="流量单价(MB/小时)" name="networkPrice" style={{ flex: 1 }}>
                 <InputNumber placeholder="请输入流量单价" style={{ width: '60%' }} stringMode/>
               </Form.Item>
             </div>

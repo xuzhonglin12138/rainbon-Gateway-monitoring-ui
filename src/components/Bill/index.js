@@ -157,39 +157,6 @@ export default class Recharge extends Component {
       render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      title: '交易时间',
-      dataIndex: 'payment_time',
-      key: 'payment_time',
-      render: (text) => moment(text).format('YYYY-MM-DD HH:mm:ss'),
-    },
-    {
-      title: '账单状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (text) => {
-        let color = '';
-        let statusText = '';
-        switch (text) {
-          case 'PAID':
-            color = 'green';
-            statusText = '已支付';
-            break;
-          case 'UNPAID':
-            color = 'red';
-            statusText = '未支付';
-            break;
-          case 'PENDING':
-            color = 'orange';
-            statusText = '处理中';
-            break;
-          default:
-            color = 'default';
-            statusText = '未知状态';
-        }
-        return <Tag color={color}>{statusText}</Tag>;
-      },
-    },
-    {
       title: '总金额 (¥)',
       dataIndex: 'total_cost',
       key: 'total_cost',
@@ -230,7 +197,7 @@ export default class Recharge extends Component {
       dataIndex: 'pay_method',
       key: 'pay_method',
       render: (text) => {
-        return <Tag>{text == 'Manual' ? '后台支付' : '微信支付'}</Tag>;
+        return <Tag>{text == 'Manual' ? '后台充值' : '微信支付'}</Tag>;
       },
     },
     {

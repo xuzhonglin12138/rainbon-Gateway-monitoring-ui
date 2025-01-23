@@ -40,19 +40,11 @@ export default class Recharge extends Component {
         <Text type="secondary">充值到您的账户余额，用于支付后续的计量计费费用。</Text>
         <div className={styles.balanceInfo}>
           <Row gutter={24}>
-            <Col span={12}>
+            <Col span={24}>
               <Card>
-                <Text type="secondary">当前余额</Text>
+                <Text style={{ color: '#71717a' }} type="secondary">当前余额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#52c41a', fontSize: '24px' }}>¥ {this.state.balance/100}</Text>
-                </div>
-              </Card>
-            </Col>
-            <Col span={12}>
-              <Card>
-                <Text type="secondary">支出金额</Text>
-                <div className={styles.amount}>
-                  <Text strong style={{ color: '#f5222d', fontSize: '24px' }}>¥ {this.state.totalExpense/100}</Text>
+                  <Text strong style={{ color: '#16a34a', fontSize: '30px' }}>¥ {this.state.balance/100}</Text>
                 </div>
               </Card>
             </Col>

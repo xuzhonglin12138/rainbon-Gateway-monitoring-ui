@@ -48,7 +48,7 @@ export default class index extends Component {
         key: 'bill',
       },
       {
-        label: '计费标准',
+        label: '价格计算器',
         key: 'standard',
       },
       {

@@ -106,8 +106,8 @@ export default class Recharge extends Component {
 
     return (
       <div className={styles.container}>
-        <Title level={2}>计费标准</Title>
-        <Text type="secondary">用于计量计费费用的计费标准。</Text>
+        <Title level={2}>价格计算器</Title>
+        <Text type="secondary">用于计量计费费用的价格计算。</Text>
         {pricingLoading ? (
           <div className={styles.loading}>
             <Spin />
@@ -126,7 +126,7 @@ export default class Recharge extends Component {
 
         {!pricingLoading &&
           <div className={styles.calculator}>
-            <Title level={3}>价格计算器</Title>
+            <Title level={3}>计算器</Title>
             <Text type="secondary">根据您的需求估算价格</Text>
 
             <div className={styles.inputs}>
@@ -144,7 +144,7 @@ export default class Recharge extends Component {
                   <Input value={storage} onChange={e => this.handleInputChange('storage', e.target.value)} />
                 </div>
                 <div className={styles.inputGroup}>
-                  <Text>流量 (M)</Text>
+                  <Text>流量 (MB)</Text>
                   <Input value={traffic} onChange={e => this.handleInputChange('traffic', e.target.value)} />
                 </div>
               </div>
@@ -160,8 +160,8 @@ export default class Recharge extends Component {
             </div>
 
             <div className={styles.total}>
-              <Text>总计:</Text>
-              <Title level={2}>¥{this.calculateTotal()}</Title>
+              <div className={styles.title}>总计:</div>
+              <div className={styles.number}>¥{this.calculateTotal()}</div>
             </div>
           </div>
         }
