@@ -1,0 +1,25 @@
+.container {
+  :global {
+    .ant-modal-close {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+  }
+}
+.closeIcon {
+  font-size: 32px;
+  margin-left: -24px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+  transition: color 0.3s;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.75);
+  }
+}

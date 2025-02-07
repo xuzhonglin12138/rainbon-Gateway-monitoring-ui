@@ -12,7 +12,8 @@ const DetailModal = ({ visible, onClose, detailData }) => {
       onCancel={onClose}
       width={1200}
       footer={null}
-      closable={false}
+      closable={true}
+      closeIcon={<span className={styles.closeIcon}>×</span>}
     >
       <div>
         <div className={styles.summary}>

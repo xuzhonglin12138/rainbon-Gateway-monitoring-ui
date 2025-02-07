@@ -1,24 +1,24 @@
 import React, { Component } from 'react'
 import { DatePicker, Button, Table, Row, Col, notification, Select } from 'antd';
 import { getDailyBillList } from '@/api';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from './index.less'
 
 const { RangePicker } = DatePicker;
-
 
 export default class index extends Component {
   constructor(props) {
     super(props)
     const { baseInfo } = props || {};
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
     this.state = {
-      dateValue: [],
+      dateRange: [startDate, endDate],
       expenseLoading: false,
       expenseList: [],
       expensePage: 1,
       expensePageSize: 5,
       expenseTotal: 0,
-      dateRange: [],
       region: '',
       userId: '',
       cluster_info: baseInfo?.cluster_info || [],
@@ -56,8 +56,8 @@ export default class index extends Component {
     this.setState({ expenseLoading: true });
     const { dateRange, expensePage, expensePageSize, region, userId } = this.state;
     getDailyBillList({
-      start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD') : '',
-      end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD') : '',
+      start_time: dateRange[0] ? dateRange[0].format('YYYY-MM-DD') : '',
+      end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD') : '',
       page: expensePage || 1,
       region_name: region || '',
       user_id: userId || '',
@@ -77,12 +77,7 @@ export default class index extends Component {
     });
   }
   onDateChange = (dates) => {
-    if (!dates || dates.length === 0) {
-      this.setState({ dateRange: [], dateValue: [] });
-    } else {
-      const formattedDates = (dates || []).map(date => date.format('YYYY-MM-DD'));
-      this.setState({ dateRange: formattedDates, dateValue: dates });
-    }
+    this.setState({ dateRange: dates || [] });
   };
   handleExpenseSearch = () => {
     this.setState({ expensePage: 1 }, () => {
@@ -90,12 +85,13 @@ export default class index extends Component {
     });
   };
   handleExpenseReset = () => {
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
     this.setState({
-      dateRange: [],
-      dateValue: [],
-      expensePage: 1,
+      dateRange: [startDate, endDate],
       region: '',
       userId: '',
+      expensePage: 1,
     }, () => {
       this.fetchExpenseList();
     });
@@ -128,7 +124,7 @@ export default class index extends Component {
         title: '账单日期',
         dataIndex: 'bill_date',
         key: 'bill_date',
-        render: (text) => moment(text).format('YYYY-MM-DD'),
+        render: (text) => dayjs(text).format('YYYY-MM-DD'),
       },
       {
         title: 'CPU',
@@ -183,9 +179,10 @@ export default class index extends Component {
             <Row style={{ marginBottom: 20 }}>
               <Col span={6}>
                 <RangePicker
-                  value={this.state.dateValue}
-                  format="YYYY/MM/DD"
+                  value={this.state.dateRange}
+                  format="YYYY-MM-DD"
                   onChange={this.onDateChange}
+                  allowClear={false}
                 />
               </Col>
               <Col span={6}>

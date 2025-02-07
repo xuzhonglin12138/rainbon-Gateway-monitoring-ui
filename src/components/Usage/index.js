@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Typography, Card, Table, DatePicker, Select, Button, notification, Skeleton } from 'antd';
 import { getCostSummary, getServiceCostSummary } from '@/api';
 import { getNamespace } from '@/utils/global';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import styles from './index.less';
 
 const { Title, Text } = Typography;
@@ -12,8 +12,10 @@ export default class UsageDetails extends Component {
   constructor(props) {
     super(props);
     const namespaceStr = getNamespace(props?.baseInfo) || '';
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
     this.state = {
-      dateRange: [],
+      dateRange: [startDate, endDate],
       selectedProject: '',
       expenseLoading: false,
       summaryData: {},
@@ -35,8 +37,8 @@ export default class UsageDetails extends Component {
     const { dateRange, selectedProject, serviceCostPage, serviceCostPageSize, namespace } = this.state;
     const { globalUtile } = this.props;
     const params = {
-      start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
-      end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
+      start_time: dateRange[0] ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '',
+      end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       namespace: namespace || '',
       page: serviceCostPage,
@@ -85,8 +87,8 @@ export default class UsageDetails extends Component {
     this.setState({ summaryLoading: true });
     const { dateRange, selectedProject, namespace } = this.state;
     const params = {
-      start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
-      end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
+      start_time: dateRange[0] ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '',
+      end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       namespace: namespace || '',
       region_name: globalUtile.getCurrRegionName()
@@ -107,12 +109,7 @@ export default class UsageDetails extends Component {
   }
   // 日期选择
   onDateChange = (dates) => {
-    if (!dates || dates.length === 0) {
-      this.setState({ dateRange: [], dateValue: [] });
-    } else {
-      const formattedDates = dates.map(date => date.format('YYYY-MM-DD HH:mm:ss'));
-      this.setState({ dateRange: formattedDates, dateValue: dates });
-    }
+    this.setState({ dateRange: dates || [] });
   };
   onProjectChange = (value) => {
     this.setState({ selectedProject: value });
@@ -124,7 +121,13 @@ export default class UsageDetails extends Component {
     });
   }
   handleReset = () => {
-    this.setState({ selectedProject: '', dateRange: [], dateValue: [], serviceCostPage: 1 }, () => {
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
+    this.setState({
+      dateRange: [startDate, endDate],
+      selectedProject: '',
+      serviceCostPage: 1
+    }, () => {
       this.getServiceCostSummary();
       this.getCostSummary();
     });
@@ -151,7 +154,7 @@ export default class UsageDetails extends Component {
       { title: '总计', dataIndex: 'total_cost', key: 'total_cost', 
         render: (text) => `¥${(text / 100)?.toFixed(2) || 0}` }
     ];
-
+    console.log(this.state.dateRange, '12321312dateRange')
     return (
       <div className={styles.container}>
         <Title level={2}>用量明细</Title>
@@ -162,10 +165,10 @@ export default class UsageDetails extends Component {
               <div className={styles.filterItem}>
                 <span className={styles.filterLabel}>交易时间：</span>
                 <RangePicker
-                  value={this.state.dateValue}
-                  showTime
-                  format="YYYY/MM/DD HH:mm:ss"
+                  value={this.state.dateRange}
+                  format="YYYY-MM-DD"
                   onChange={this.onDateChange}
+                  allowClear={false}
                 />
               </div>
               <div className={styles.filterItem}>

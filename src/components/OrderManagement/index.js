@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { DatePicker, Button, Table, Tag, Select, notification, Row, Col } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { getAllRechargeList, getRechargeDetail } from '@/api';
 import RechargeModal from '@/components/RechargeModal';
 import styles from './index.less';
@@ -10,6 +10,8 @@ const { RangePicker } = DatePicker;
 export default class OrderManagement extends Component {
   constructor(props) {
     super(props)
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
     this.state = {
       rechargeList: [],
       rechargeLoading: false,
@@ -18,7 +20,7 @@ export default class OrderManagement extends Component {
       rechargePageSize: 5,
       rechargeDetail: {},
       rechargeModalVisible: false,
-      dateRange: [],
+      dateRange: [startDate, endDate],
       rechargeSearchText: '',
     }
   }
@@ -37,8 +39,8 @@ export default class OrderManagement extends Component {
     this.setState({ rechargeLoading: true });
     const { dateRange, rechargeSearchText, rechargePage, rechargePageSize } = this.state;
     const params = {
-      start_time: dateRange[0] ? moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss') : '',
-      end_time: dateRange[1] ? moment(dateRange[1]).format('YYYY-MM-DD HH:mm:ss') : '',
+      start_time: dateRange[0] ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '',
+      end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       status: rechargeSearchText || '',
       page: rechargePage || 1,
       page_size: rechargePageSize || 5,
@@ -72,17 +74,13 @@ export default class OrderManagement extends Component {
   };
 
   onDateChange = (dates) => {
-    if (!dates || dates.length === 0) {
-      this.setState({ dateRange: [], dateValue: [] });
-    } else {
-      const formattedDates = dates.map(date => date.format('YYYY-MM-DD HH:mm:ss'));
-      this.setState({ dateRange: formattedDates, dateValue: dates });
-    }
+    this.setState({ dateRange: dates || [] });
   };
   handleRechargeReset = () => {
+    const endDate = dayjs();
+    const startDate = dayjs().subtract(7, 'days');
     this.setState({
-      dateRange: [],
-      dateValue: [],
+      dateRange: [startDate, endDate],
       rechargeSearchText: '',
       rechargePage: 1
     }, () => {
@@ -114,7 +112,7 @@ export default class OrderManagement extends Component {
         key: 'pay_time',
         render: (text) => {
           if (text) {
-            return moment(text).format('YYYY-MM-DD HH:mm:ss');
+            return dayjs(text).format('YYYY-MM-DD HH:mm:ss');
           }
           return '-';
         },
@@ -174,22 +172,22 @@ export default class OrderManagement extends Component {
       },
     ];
 
-
+    console.log(this.state.dateRange, 'dateRange')
     return (
       <div className={styles.container}>
         <div className={styles.searchBar}>
           <Row style={{ marginBottom: 20 }}>
             <Col span={8}>
               <RangePicker
-                value={this.state.dateValue}
-                showTime
-                format="YYYY/MM/DD HH:mm:ss"
+                value={this.state.dateRange}
+                format="YYYY-MM-DD"
                 onChange={this.onDateChange}
+                allowClear={false}
               />
             </Col>
             <Col span={8}>
               <Select
-                  style={{ width: 200, marginLeft: 10 }}
+                style={{ width: 200, marginLeft: 10 }}
                 placeholder="选择状态"
                 value={this.state.rechargeSearchText}
                 onChange={this.handleRechargeStatusChange}
