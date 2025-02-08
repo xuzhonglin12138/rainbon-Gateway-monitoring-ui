@@ -159,7 +159,7 @@ export default class OrderManagement extends Component {
         key: 'amount',
         render: (amount) => (
           <span>
-            ¥{amount / 100}
+            ¥{amount / 1000000}
           </span>
         ),
       },

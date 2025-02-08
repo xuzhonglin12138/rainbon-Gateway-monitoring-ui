@@ -41,7 +41,7 @@ export default class WeChatRechargeModal extends Component {
     this.setState({ loading: true });
     const { customAmount } = this.props;
     getWechatRechargeCode({
-      amount: customAmount * 100,
+      amount: customAmount * 1000000,
       description: '充值'
     }).then(res => {
       this.setState({

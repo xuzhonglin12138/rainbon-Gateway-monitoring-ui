@@ -49,10 +49,10 @@ export default class Recharge extends Component {
 
     // 基础小时费率计算
     const hourlyRate = (
-      memory * (pricingConfig?.memory_price_per_gb || 0) +
-      cpu * (pricingConfig?.cpu_price_per_core || 0) +
-      storage * (pricingConfig?.storage_price_per_gb || 0) +
-      traffic * (pricingConfig?.network_price_per_mb || 0) / (24 * 30) // 将流量费用平均到每小时
+      memory * (pricingConfig?.memory_price_per_gb/1000000 || 0) +
+      cpu * (pricingConfig?.cpu_price_per_core/1000000 || 0) +
+      storage * (pricingConfig?.storage_price_per_gb/1000000 || 0) +
+      traffic * (pricingConfig?.network_price_per_mb/1000000 || 0) / (24 * 30) // 将流量费用平均到每小时
     );
 
     // 根据不同时间单位计算总时长（小时）
@@ -85,10 +85,10 @@ export default class Recharge extends Component {
   render() {
     const { memory, cpu, storage, traffic, duration, timeUnit, pricingConfig, pricingLoading } = this.state;
     const priceCards = [
-      { title: '内存', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.memory_price_per_gb || '0'}` },
-      { title: 'CPU', subtitle: '每Core/小时价格', price: `¥${pricingConfig?.cpu_price_per_core || '0'}` },
-      { title: '存储', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.storage_price_per_gb || '0'}` },
-      { title: '流量', subtitle: '每MB/小时价格', price: `¥${pricingConfig?.network_price_per_mb || '0'}` },
+      { title: '内存', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.memory_price_per_gb/1000000 || '0'}` },
+      { title: 'CPU', subtitle: '每Core/小时价格', price: `¥${pricingConfig?.cpu_price_per_core/1000000 || '0'}` },
+      { title: '存储', subtitle: '每GB/小时价格', price: `¥${pricingConfig?.storage_price_per_gb/1000000 || '0'}` },
+      { title: '流量', subtitle: '每MB/小时价格', price: `¥${pricingConfig?.network_price_per_mb/1000000 || '0'}` },
     ];
 
     const selectAfter = (

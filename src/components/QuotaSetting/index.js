@@ -59,7 +59,7 @@ export default class index extends Component {
     const { selectedUser } = this.state;
     manualRecharge({
       user_id: selectedUser.user_id,
-      amount: amount * 100,
+      amount: amount * 1000000,
       description: remark,
     }).then(res => {
       if (res) {

@@ -42,10 +42,10 @@ export default class index extends Component {
       closable: false,
       onOk: () => {
         updatePricingConfig({
-          cpu_price_per_core: Number(values.cpuPrice),
-          memory_price_per_gb: Number(values.memoryPrice),
-          storage_price_per_gb: Number(values.storagePrice),
-          network_price_per_mb: Number(values.networkPrice),
+          cpu_price_per_core: Number(values.cpuPrice) * 1000000,
+          memory_price_per_gb: Number(values.memoryPrice) * 1000000,
+          storage_price_per_gb: Number(values.storagePrice) * 1000000,
+          network_price_per_mb: Number(values.networkPrice) * 1000000,
           region_name: this.state.regionName
         }).then(() => {
           notification.success({
@@ -68,10 +68,10 @@ export default class index extends Component {
             layout="vertical"
             onFinish={this.handleSave}
             initialValues={{
-              memoryPrice: this.state.memoryPrice,
-              cpuPrice: this.state.cpuPrice,
-              storagePrice: this.state.storagePrice,
-              networkPrice: this.state.networkPrice
+              memoryPrice: this.state.memoryPrice / 1000000,
+              cpuPrice: this.state.cpuPrice / 1000000,
+              storagePrice: this.state.storagePrice / 1000000,
+              networkPrice: this.state.networkPrice / 1000000
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -164,7 +164,7 @@ export default class Recharge extends Component {
       key: 'total_cost',
       render: (amount) => (
         <span style={{ color: '#ff4d4f' }}>
-          -¥{(amount / 100).toFixed(2)}
+          -¥{amount ? (amount / 1000000).toFixed(6) : 0}
         </span>
       ),
     },
@@ -235,7 +235,7 @@ export default class Recharge extends Component {
       key: 'amount',
       render: (amount) => (
         <span>
-          ¥{amount / 100}
+          ¥{amount / 1000000}
         </span>
       ),
     },
