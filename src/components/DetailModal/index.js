@@ -41,10 +41,12 @@ const DetailModal = ({ visible, onClose, detailData }) => {
         <Table
           columns={[
             { title: '组件名称', dataIndex: 'service_name', key: 'service_name' },
-            { title: 'CPU(Core)', dataIndex: 'cpu_usage', key: 'cpu_usage' },
+            { title: 'CPU(Core)', dataIndex: 'cpu_usage', key: 'cpu_usage',
+              render: (text) => `${text ? text.toFixed(2) : 0}`},
             { title: 'CPU金额(元)', dataIndex: 'cpu_cost', key: 'cpu_cost', 
               render: (text) => `-¥${text ? (text / 1000000).toFixed(6) : 0}` },
-            { title: '内存(MB)', dataIndex: 'memory_usage', key: 'memory_usage' },
+            { title: '内存(GB)', dataIndex: 'memory_usage', key: 'memory_usage',
+              render: (text) => `${text ? (text / 1024).toFixed(2) : 0}`},
             { title: '内存金额(元)', dataIndex: 'memory_cost', key: 'memory_cost', 
               render: (text) => `-¥${text ? (text / 1000000).toFixed(6) : 0}` },
             { title: '存储(GB)', dataIndex: 'storage_usage', key: 'storage_usage' },

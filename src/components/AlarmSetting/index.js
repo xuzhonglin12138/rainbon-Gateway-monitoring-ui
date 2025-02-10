@@ -44,7 +44,7 @@ export default class index extends Component {
           
           // 阈值配置
           check_interval: threshold.check_interval,
-          low_balance_threshold: threshold.low_balance_threshold,
+          low_balance_threshold: threshold.low_balance_threshold / 1000000,
           overdue_cleanup_days: threshold.overdue_cleanup_days,
           notify_interval: threshold.notify_interval
         });
@@ -90,7 +90,7 @@ export default class index extends Component {
       },
       threshold: {
         check_interval: values.check_interval,
-        low_balance_threshold: values.low_balance_threshold,
+        low_balance_threshold: values.low_balance_threshold * 1000000,
         overdue_cleanup_days: values.overdue_cleanup_days,
         notify_interval: values.notify_interval
       }
