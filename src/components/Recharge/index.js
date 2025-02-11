@@ -31,7 +31,7 @@ export default class Recharge extends Component {
     });
   }
   // 预设的充值金额选项
-  amountOptions = [50, 100, 200, 500, 1000, '其他金额'];
+  amountOptions = [50, 100, 200, 500, 1000, 2000, 5000, '其他金额'];
 
   render() {
     return (

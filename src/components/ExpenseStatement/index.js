@@ -17,7 +17,7 @@ export default class index extends Component {
       expenseLoading: false,
       expenseList: [],
       expensePage: 1,
-      expensePageSize: 5,
+      expensePageSize: 20,
       expenseTotal: 0,
       region: '',
       userId: '',
@@ -61,7 +61,7 @@ export default class index extends Component {
       page: expensePage || 1,
       region_name: region || '',
       user_id: userId || '',
-      page_size: expensePageSize || 5,
+      page_size: expensePageSize || 20,
     }).then(res => {
       this.setState({
         expenseList: res.data.bills,

@@ -22,7 +22,7 @@ export default class UsageDetails extends Component {
       serviceCostSummary: [],
       serviceCostLoading: false,
       serviceCostPage: 1,
-      serviceCostPageSize: 5,
+      serviceCostPageSize: 10,
       serviceCostTotal: 0,
       namespace: namespaceStr.length > 0 ? namespaceStr.join(',') : '',
     };

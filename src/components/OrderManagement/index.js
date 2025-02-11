@@ -17,7 +17,7 @@ export default class OrderManagement extends Component {
       rechargeLoading: false,
       rechargeTotal: 0,
       rechargePage: 1,
-      rechargePageSize: 5,
+      rechargePageSize: 20,
       rechargeDetail: {},
       rechargeModalVisible: false,
       dateRange: [startDate, endDate],
@@ -43,7 +43,7 @@ export default class OrderManagement extends Component {
       end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       status: rechargeSearchText || '',
       page: rechargePage || 1,
-      page_size: rechargePageSize || 5,
+      page_size: rechargePageSize || 20,
     }
     getAllRechargeList(params).then(res => {
       console.log(res);

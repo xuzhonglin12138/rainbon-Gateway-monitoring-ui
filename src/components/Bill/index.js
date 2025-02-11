@@ -37,10 +37,10 @@ export default class Recharge extends Component {
       selectedProject: '',
       rechargeSearchText: '',
       expensePage: 1,
-      expensePageSize: 5,
+      expensePageSize: 20,
       expenseTotal: 0,
       rechargePage: 1,
-      rechargePageSize: 5,
+      rechargePageSize: 20,
       rechargeTotal: 0,
       expenseLoading: false,
       modalVisible: false,
@@ -64,7 +64,7 @@ export default class Recharge extends Component {
       end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       status: rechargeSearchText || '',
       page: rechargePage || 1,
-      page_size: rechargePageSize || 10,
+      page_size: rechargePageSize || 20,
     }
     getRechargeList(params).then(res => {
       this.setState({ rechargeList: res.data.records, rechargeTotal: res.data.total, rechargeLoading: false });
@@ -87,7 +87,7 @@ export default class Recharge extends Component {
       end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       app_id: selectedProject || '',
       page: expensePage || 1,
-      page_size: expensePageSize || 5,
+      page_size: expensePageSize || 20,
       // namespace: namespaceArr.length > 0 ? namespaceArr.join(',') : ''
       region_name: globalUtile.getCurrRegionName()
     }
