@@ -115,7 +115,7 @@ export default class UsageDetails extends Component {
     this.setState({ selectedProject: value });
   }
   handleSearch = () => {
-    this.setState({ serviceCostPage: 1}, () => {
+    this.setState({ serviceCostPage: 1 }, () => {
       this.getServiceCostSummary();
       this.getCostSummary();
     });
@@ -136,25 +136,35 @@ export default class UsageDetails extends Component {
   render() {
     const { summaryData, serviceCostSummary, projectList, serviceCostLoading, summaryLoading, serviceCostPage, serviceCostPageSize, serviceCostTotal } = this.state;
     const summaryDataArray = [
-      { key: '1', label: '内存', value: `¥${summaryData?.memory_cost ? (summaryData?.memory_cost / 1000000)?.toFixed(6) : 0}` },
-      { key: '2', label: 'CPU', value: `¥${summaryData?.cpu_cost ? (summaryData?.cpu_cost / 1000000)?.toFixed(6) : 0}` },
-      { key: '3', label: '存储', value: `¥${summaryData?.storage_cost ? (summaryData?.storage_cost / 1000000)?.toFixed(6) : 0}` },
-      { key: '4', label: '流量', value: `¥${summaryData?.network_cost ? (summaryData?.network_cost / 1000000)?.toFixed(6) : 0}` }, 
+      { key: '1', label: '内存', value: `${summaryData?.memory_cost ? (summaryData?.memory_cost / 1000000)?.toFixed(6) : 0}` },
+      { key: '2', label: 'CPU', value: `${summaryData?.cpu_cost ? (summaryData?.cpu_cost / 1000000)?.toFixed(6) : 0}` },
+      { key: '3', label: '存储', value: `${summaryData?.storage_cost ? (summaryData?.storage_cost / 1000000)?.toFixed(6) : 0}` },
+      { key: '4', label: '流量', value: `${summaryData?.network_cost ? (summaryData?.network_cost / 1000000)?.toFixed(6) : 0}` },
     ];
     const columns = [
       { title: '应用', dataIndex: 'app_name', key: 'app_name' },
-      { title: '内存', dataIndex: 'memory_cost', key: 'memory_cost', 
-        render: (text) => `¥${text ? (text / 1000000)?.toFixed(6) : 0}` },
-      { title: 'CPU', dataIndex: 'cpu_cost', key: 'cpu_cost', 
-        render: (text) => `¥${text ? (text / 1000000)?.toFixed(6) : 0}` },
-      { title: '存储', dataIndex: 'storage_cost', key: 'storage_cost', 
-        render: (text) => `¥${text ? (text / 1000000)?.toFixed(6) : 0}` },
-      { title: '流量', dataIndex: 'network_cost', key: 'network_cost', 
-        render: (text) => `¥${text ? (text / 1000000)?.toFixed(6) : 0}` },
-      { title: '总计', dataIndex: 'total_cost', key: 'total_cost', 
-        render: (text) => `¥${text ? (text / 1000000)?.toFixed(6) : 0}` }
+      {
+        title: '内存', dataIndex: 'memory_cost', key: 'memory_cost',
+        render: (text) => `${text ? (text / 1000000)?.toFixed(6) : 0}`
+      },
+      {
+        title: 'CPU', dataIndex: 'cpu_cost', key: 'cpu_cost',
+        render: (text) => `${text ? (text / 1000000)?.toFixed(6) : 0}`
+      },
+      {
+        title: '存储', dataIndex: 'storage_cost', key: 'storage_cost',
+        render: (text) => `${text ? (text / 1000000)?.toFixed(6) : 0}`
+      },
+      {
+        title: '流量', dataIndex: 'network_cost', key: 'network_cost',
+        render: (text) => `${text ? (text / 1000000)?.toFixed(6) : 0}`
+      },
+      {
+        title: '总计', dataIndex: 'total_cost', key: 'total_cost',
+        render: (text) => `${text ? (text / 1000000)?.toFixed(6) : 0}`
+      }
     ];
-    console.log(this.state.dateRange, '12321312dateRange')
+    
     return (
       <div className={styles.container}>
         <Title level={2}>用量明细</Title>
@@ -205,7 +215,9 @@ export default class UsageDetails extends Component {
             </div>
             <Card className={styles.totalCard}>
               <p className={styles.summaryLabel}>总金额</p>
-              <p className={styles.totalAmount}>¥{(summaryData?.total_cost / 1000000)?.toFixed(2) || 0}</p>
+              <p className={styles.totalAmount}>
+                {(summaryData?.total_cost / 1000000)?.toFixed(2) || 0}
+              </p>
             </Card>
           </>
         )}

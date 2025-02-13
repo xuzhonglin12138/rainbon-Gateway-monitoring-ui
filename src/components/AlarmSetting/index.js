@@ -139,7 +139,7 @@ export default class index extends Component {
               min={1}
               style={{ width: '100%' }}
               placeholder="请输入检查间隔"
-              addonAfter="小时"
+              addonAfter="分钟"
             />
           </Form.Item>
 

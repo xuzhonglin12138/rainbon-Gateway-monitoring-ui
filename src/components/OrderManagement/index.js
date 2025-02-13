@@ -154,7 +154,7 @@ export default class OrderManagement extends Component {
         },
       },
       {
-        title: '总金额 (¥)',
+        title: '总金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => (

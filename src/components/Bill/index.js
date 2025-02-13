@@ -159,12 +159,12 @@ export default class Recharge extends Component {
       render: (text) => dayjs(text).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      title: '总金额 (¥)',
+      title: '总金额',
       dataIndex: 'total_cost',
       key: 'total_cost',
       render: (amount) => (
         <span style={{ color: '#ff4d4f' }}>
-          -¥{amount ? (amount / 1000000).toFixed(6) : 0}
+          -{amount ? (amount / 1000000).toFixed(6) : 0}
         </span>
       ),
     },
@@ -230,7 +230,7 @@ export default class Recharge extends Component {
       },
     },
     {
-      title: '总金额 (¥)',
+      title: '总金额',
       dataIndex: 'amount',
       key: 'amount',
       render: (amount) => (

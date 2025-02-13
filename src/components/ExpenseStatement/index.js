@@ -130,31 +130,31 @@ export default class index extends Component {
         title: 'CPU',
         dataIndex: 'cpu_cost',
         key: 'cpu_cost',
-        render: (text) => <span>¥{(text / 1000000).toFixed(6)}</span>, 
+        render: (text) => <span>{(text / 1000000).toFixed(6)}</span>, 
       },
       {
         title: '内存',
         dataIndex: 'memory_cost',
         key: 'memory_cost',
-        render: (text) => <span>¥{(text / 1000000).toFixed(6)}</span>,
+        render: (text) => <span>{(text / 1000000).toFixed(6)}</span>,
       },
       {
         title: '存储',
         dataIndex: 'storage_cost',
         key: 'storage_cost',
-        render: (text) => <span>¥{(text / 1000000).toFixed(6)}</span>,
+        render: (text) => <span>{(text / 1000000).toFixed(6)}</span>,
       },
       {
         title: '网络',
         dataIndex: 'network_cost',
         key: 'network_cost',
-        render: (text) => <span>¥{(text / 1000000).toFixed(6)}</span>,
+        render: (text) => <span>{(text / 1000000).toFixed(6)}</span>,
       },
       {
         title: '总金额',
         dataIndex: 'total_cost',
         key: 'total_cost',
-        render: (text) => <span>¥{(text / 1000000).toFixed(6)}</span>,
+        render: (text) => <span>{(text / 1000000).toFixed(6)}</span>,
       },
     ]
     const { cluster_info, userList } = this.state;

@@ -34,12 +34,12 @@ export default class index extends Component {
         key: 'expenseStatement',
       },
       {
-        label: '成本设置',
-        key: 'costSetting',
-      },
-      {
         label: '额度设置',
         key: 'quotaSetting',
+      },
+      {
+        label: '成本设置',
+        key: 'costSetting',
       },
       {
         label: '告警设置',

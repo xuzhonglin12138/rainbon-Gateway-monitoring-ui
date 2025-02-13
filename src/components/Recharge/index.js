@@ -44,7 +44,8 @@ export default class Recharge extends Component {
               <Card>
                 <Text style={{ color: '#71717a' }} type="secondary">当前余额</Text>
                 <div className={styles.amount}>
-                  <Text strong style={{ color: '#16a34a', fontSize: '30px' }}>¥ {(this.state.balance/1000000).toFixed(2)}</Text>
+                  <Text strong style={{ color: '#16a34a', fontSize: '30px' }}>
+                    {(this.state.balance/1000000).toFixed(2)}</Text>
                 </div>
               </Card>
             </Col>
@@ -66,7 +67,7 @@ export default class Recharge extends Component {
                 }}
                 size="small"
               >
-                {typeof amount === 'number' ? `¥ ${amount}` : amount}
+                {typeof amount === 'number' ? `${amount}` : amount}
               </Card>
             </Col>
           ))}
