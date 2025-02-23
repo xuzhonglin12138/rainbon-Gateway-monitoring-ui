@@ -16,12 +16,14 @@ export default class OrderManagement extends Component {
       rechargeList: [],
       rechargeLoading: false,
       rechargeTotal: 0,
+      totalAmount: 0,
       rechargePage: 1,
       rechargePageSize: 20,
       rechargeDetail: {},
       rechargeModalVisible: false,
       dateRange: [startDate, endDate],
       rechargeSearchText: '',
+      payMethod: '',
     }
   }
   componentDidMount() {
@@ -37,23 +39,29 @@ export default class OrderManagement extends Component {
   };
   fetchRechargeList = () => {
     this.setState({ rechargeLoading: true });
-    const { dateRange, rechargeSearchText, rechargePage, rechargePageSize } = this.state;
+    const { dateRange, rechargeSearchText, rechargePage, rechargePageSize, payMethod } = this.state;
     const params = {
       start_time: dateRange[0] ? dateRange[0].format('YYYY-MM-DD HH:mm:ss') : '',
       end_time: dateRange[1] ? dateRange[1].format('YYYY-MM-DD HH:mm:ss') : '',
       status: rechargeSearchText || '',
       page: rechargePage || 1,
       page_size: rechargePageSize || 20,
+      pay_method: payMethod || ''
     }
     getAllRechargeList(params).then(res => {
       console.log(res);
-      this.setState({ rechargeList: res.data.data, rechargeTotal: res.data.total, rechargeLoading: false });
+      this.setState({ 
+        rechargeList: res.data.data, 
+        rechargeTotal: res.data.total, 
+        totalAmount: res.data.total_amount || 0,
+        rechargeLoading: false 
+      });
     }).catch(err => {
       notification.error({
         message: '获取充值订单列表失败',
         description: err.message
       });
-      this.setState({ rechargeLoading: false, rechargeList: [], rechargeTotal: 0 });
+      this.setState({ rechargeLoading: false, rechargeList: [], rechargeTotal: 0, totalAmount: 0 });
     });
   }
   showRechargeDetails = (record) => {
@@ -76,18 +84,24 @@ export default class OrderManagement extends Component {
   onDateChange = (dates) => {
     this.setState({ dateRange: dates || [] });
   };
+  handlePayMethodChange = (value) => {
+    this.setState({ payMethod: value });
+  };
+
   handleRechargeReset = () => {
     const endDate = dayjs();
     const startDate = dayjs().subtract(7, 'days');
     this.setState({
       dateRange: [startDate, endDate],
       rechargeSearchText: '',
+      payMethod: '',
       rechargePage: 1
     }, () => {
       this.fetchRechargeList();
     });
   };
   render() {
+    const { totalAmount } = this.state;
     const rechargeStatusOptions = [
       { value: '', label: '所有状态' },
       { value: 'SUCCESS', label: '支付成功' },
@@ -95,6 +109,13 @@ export default class OrderManagement extends Component {
       { value: 'NOTPAY', label: '未支付' },
       { value: 'CLOSED', label: '已关闭' },
     ];
+
+    const payMethodOptions = [
+      { value: '', label: '所有方式' },
+      { value: 'Manual', label: '后台充值' },
+      { value: 'WeChat', label: '微信支付' },
+    ];
+
     const columns = [
       {
         title: '订单号',
@@ -187,14 +208,24 @@ export default class OrderManagement extends Component {
             </Col>
             <Col span={8}>
               <Select
-                style={{ width: 200, marginLeft: 10 }}
+                style={{ width: 120, marginLeft: 10 }}
                 placeholder="选择状态"
                 value={this.state.rechargeSearchText}
                 onChange={this.handleRechargeStatusChange}
                 options={rechargeStatusOptions}
               />
+              <Select
+                style={{ width: 120, marginLeft: 10 }}
+                placeholder="充值方式"
+                value={this.state.payMethod}
+                onChange={this.handlePayMethodChange}
+                options={payMethodOptions}
+              />
             </Col>
             <Col span={8} style={{ textAlign: 'right' }}>
+              <span style={{ marginRight: 16, fontSize: 14 }}>
+                总金额：<span style={{ fontWeight: 600, fontSize: 16 }}>¥{(totalAmount / 1000000).toFixed(2)}</span>
+              </span>
               <Button type="primary" onClick={this.handleRechargeSearch} style={{ marginRight: 10 }}>搜索</Button>
               <Button onClick={this.handleRechargeReset}>重置</Button>
             </Col>

@@ -250,3 +250,17 @@ export async function upAlarmSettingInfo(data) {
   );
 }
 
+/**
+ * 获取用户列表
+ * @param {Object} params
+ * @param {number} params.page - 页码
+ * @param {number} params.page_size - 每页条数
+ * @param {string} params.name - 搜索关键字
+ * @returns {Promise}
+ */
+export async function getUserList(params) {
+  return request(`/api/v1/admin/users`, {
+    method: 'GET',
+    params
+  });
+}

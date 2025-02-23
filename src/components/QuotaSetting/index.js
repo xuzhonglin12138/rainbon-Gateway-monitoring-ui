@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Table, Button, Modal, Input, Form, InputNumber, Row, Col, notification } from 'antd'
-import { manualRecharge } from '@/api'
+import { manualRecharge, getUserList } from '@/api'
 import moment from 'moment'
 
 export default class index extends Component {
@@ -9,7 +9,7 @@ export default class index extends Component {
     this.state = {
       userList: [],
       page: 1,
-      pageSize: 10,
+      pageSize: 20,
       name: '',
       total: 0,
       modalVisible: false,
@@ -23,30 +23,31 @@ export default class index extends Component {
   componentDidMount() {
     this.loadUser()
   }
+  
   loadUser = () => {
-    const {
-      dispatch,
-      baseInfo: {
-        currentUser
-      }
-    } = this.props;
     const { page, pageSize, name } = this.state;
     this.setState({ loading: true });
-    dispatch({
-      type: 'global/fetchEnterpriseUsers',
-      payload: {
-        enterprise_id: currentUser.enterprise_id,
-        page,
-        page_size: pageSize,
-        name: name || '',
-      },
-      callback: res => {
-        if (res) {
-          this.setState({ userList: res.list, total: res.total, loading: false });
-        }
+    getUserList({
+      page,
+      page_size: pageSize,
+      name: name || '',
+    }).then(res => {
+      if (res?.data) {
+        this.setState({ 
+          userList: res.data.data.users || [], 
+          total: res.data.data.total || 0, 
+          loading: false 
+        });
       }
+    }).catch(err => {
+      notification.error({
+        message: '获取用户列表失败',
+        description: err.message
+      });
+      this.setState({ loading: false, userList: [], total: 0 });
     });
   };
+
   handleRecharge = (item, record) => {
     this.setState({
       modalVisible: true,
@@ -99,8 +100,8 @@ export default class index extends Component {
     const columns = [
       {
         title: '用户名称',
-        dataIndex: 'nick_name',
-        rowKey: 'nick_name',
+        dataIndex: 'username',
+        rowKey: 'username',
         align: 'center',
         render: (val) => (
           <span>
@@ -157,6 +158,24 @@ export default class index extends Component {
         }
       },
       {
+        title: '余额',
+        dataIndex: 'balance',
+        rowKey: 'balance',
+        align: 'center',
+        render: val => {
+          const balance = (val / 1000000).toFixed(2) || '0';
+          return (
+            <span style={{ 
+              color: '#1890ff',
+              fontSize: '15px',
+              fontWeight: 500
+            }}>
+              ¥{balance}
+            </span>
+          );
+        }
+      },
+      {
         title: '操作',
         dataIndex: 'user_id',
         align: 'center',
@@ -190,7 +209,7 @@ export default class index extends Component {
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
             onShowSizeChange: this.onPageChange,
-            hideOnSinglePage: total <= 10
+            hideOnSinglePage: total <= 20
           }}
           dataSource={userList}
           columns={columns}

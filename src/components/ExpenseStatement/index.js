@@ -19,6 +19,7 @@ export default class index extends Component {
       expensePage: 1,
       expensePageSize: 20,
       expenseTotal: 0,
+      totalCost: 0,
       region: '',
       userId: '',
       cluster_info: baseInfo?.cluster_info || [],
@@ -66,6 +67,7 @@ export default class index extends Component {
       this.setState({
         expenseList: res.data.bills,
         expenseTotal: res.data.total,
+        totalCost: res.data.summary?.total_cost || 0,
         expenseLoading: false
       });
     }).catch(err => {
@@ -73,7 +75,7 @@ export default class index extends Component {
         message: '获取费用账单失败',
         description: err.message,
       });
-      this.setState({ expenseLoading: false });
+      this.setState({ expenseLoading: false, expenseList: [], expenseTotal: 0, totalCost: 0 });
     });
   }
   onDateChange = (dates) => {
@@ -92,6 +94,7 @@ export default class index extends Component {
       region: '',
       userId: '',
       expensePage: 1,
+      totalCost: 0,
     }, () => {
       this.fetchExpenseList();
     });
@@ -157,7 +160,7 @@ export default class index extends Component {
         render: (text) => <span>{(text / 1000000).toFixed(6)}</span>,
       },
     ]
-    const { cluster_info, userList } = this.state;
+    const { cluster_info, userList, totalCost } = this.state;
     const regionOptions = [
       { label: '所有集群', value: '' },
       ...(cluster_info || []).map(item => ({
@@ -205,6 +208,9 @@ export default class index extends Component {
                 />
               </Col>
               <Col span={6} style={{ textAlign: 'right' }}>
+                <span style={{ marginRight: 16, fontSize: 14 }}>
+                  总金额:<span style={{ fontWeight: 600, fontSize: 16 }}>¥{(totalCost / 1000000).toFixed(6)}</span>
+                </span>
                 <Button type="primary" onClick={this.handleExpenseSearch} style={{ marginRight: 10 }}>搜索</Button>
                 <Button onClick={this.handleExpenseReset}>重置</Button>
               </Col>
