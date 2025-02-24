@@ -68,6 +68,7 @@ export default class index extends Component {
         notification.success({
           message: '充值成功',
         });
+        this.loadUser(); // 充值成功后刷新列表数据
       }
     }).catch(() => {
       notification.error({
