@@ -11,10 +11,22 @@ export default class WeChatRechargeModal extends Component {
       orderNo: '',
       loading: true
     };
+    this.timer = null;
   }
 
   componentDidMount() {
     this.getWechatRechargeCode();
+  }
+
+  componentWillUnmount() {
+    this.clearTimer();
+  }
+
+  clearTimer = () => {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
   }
 
   getWechatRechargeStatus = () => {
@@ -22,6 +34,7 @@ export default class WeChatRechargeModal extends Component {
     getOrderStatus({ order_no: orderNo }).then(res => {
       console.log(res);
       if (res?.data?.trade_state === 'SUCCESS') {
+        this.clearTimer();
         notification.success({
           message: '充值成功',
           description: '您的账户已成功充值'
@@ -29,10 +42,11 @@ export default class WeChatRechargeModal extends Component {
         this.props.onClose();
         this.props.onOk();
       } else {
-        setTimeout(this.getWechatRechargeStatus, 1000);
+        this.timer = setTimeout(this.getWechatRechargeStatus, 1000);
       }
     }).catch(err => {
       console.log(err);
+      this.clearTimer();
     });
   }
 
