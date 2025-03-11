@@ -94,6 +94,15 @@ export default class index extends Component {
     });
   }
 
+  onPageChange = (page, pageSize) => {
+    this.setState({
+      page,
+      pageSize
+    }, () => {
+      this.loadUser();
+    });
+  }
+
   render() {
     const { userList, page, pageSize, total, modalVisible, selectedUser, name, loading } = this.state;
     this.formRef = React.createRef();
@@ -216,7 +225,7 @@ export default class index extends Component {
           columns={columns}
         />
         <Modal
-          title={`您正在给名为 ${selectedUser ? selectedUser.nick_name : ''} 的用户充值金额`}
+          title={`您正在给名为 ${selectedUser ? selectedUser.username : ''} 的用户充值金额`}
           visible={modalVisible}
           onCancel={this.handleModalCancel}
           onOk={() => this.formRef.current.submit()}

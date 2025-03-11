@@ -22,7 +22,7 @@ export default class index extends Component {
     this.setState({ loading: true });
     getAlarmSettingInfo().then(res => {
       if (res?.data) {
-        const { sms, threshold } = res.data.data;
+        const { sms, threshold, account } = res.data.data;
         
         // 更新开关状态
         this.setState({ 
@@ -41,6 +41,9 @@ export default class index extends Component {
           template_overdue: sms.template_overdue,
           template_cleanup: sms.template_cleanup,
           template_recovery: sms.template_recovery,
+
+          // 默认额度
+          default_balance: account.default_balance / 1000000,
           
           // 阈值配置
           check_interval: threshold.check_interval,
@@ -93,6 +96,9 @@ export default class index extends Component {
         low_balance_threshold: values.low_balance_threshold * 1000000,
         overdue_cleanup_days: values.overdue_cleanup_days,
         notify_interval: values.notify_interval
+      },
+      account: {
+        default_balance: values.default_balance * 1000000
       }
     };
 
@@ -180,6 +186,19 @@ export default class index extends Component {
               style={{ width: '100%' }}
               placeholder="请输入通知间隔"
               addonAfter="小时"
+            />
+          </Form.Item>
+          <Form.Item
+            label="默认额度"
+            name="default_balance"
+            rules={[{ required: true, message: '请输入新用户的默认额度' }]}
+          >
+            <InputNumber
+              min={0}
+              step={1}
+              style={{ width: '100%' }}
+              placeholder="请输入新用户的默认额度"
+              addonAfter="元"
             />
           </Form.Item>
 
