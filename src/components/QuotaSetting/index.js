@@ -154,8 +154,8 @@ export default class index extends Component {
       },
       {
         title: '创建时间',
-        dataIndex: 'create_time',
-        rowKey: 'create_time',
+        dataIndex: 'created_at',
+        rowKey: 'created_at',
         align: 'center',
         render: val => {
           return (
