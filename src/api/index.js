@@ -1,18 +1,29 @@
 import request from '../utils/request'
+import pluginData from '../pluginData.json'
 
-// 获取费用汇总
-// | 参数名     | 类型   | 必填 | 说明                                 |
-// | ---------- | ------ | ---- | ------------------------------------ |
-// | namespace  | string | 否   | 命名空间                             |
-// | app_id     | string | 否   | 应用ID                               |
-// | start_time | string | 否   | 开始时间，格式：2024-01-01T00:00:00Z |
-// | end_time   | string | 否   | 结束时间，格式：2024-01-02T00:00:00Z |
-export async function getCostSummary(params) {
-  return request(
-    `/api/v1/user/cost/summary`,
-    {
-      method: 'get',
-      params: params
-    }
-  );
+// 从地址栏获取 regionName 参数
+const getRegionID = () => {
+  const hash = window.location.hash
+  const searchParams = new URLSearchParams(hash.split('?')[1] || '')
+  return searchParams.get('regionName') || 'rainbond'
+}
+
+// 基础路径配置
+const getBasePath = () => {
+  const pluginName = pluginData.id
+  const regionID = getRegionID()
+  return `/console/regions/${regionID}/backend/plugins/${pluginName}`
+}
+
+// ==================== DEMO API ====================
+
+/**
+ * 创建 demo api
+ * @param {Object} data - 存储配置
+ */
+export async function createStorage(data) {
+  return request(`${getBasePath()}/demo/demostorages`, {
+    method: 'post',
+    data,
+  })
 }

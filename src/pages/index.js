@@ -65,6 +65,7 @@ export default class index extends Component {
           }
         }}
         locale={antdLocale}
+        prefixCls='demo-ant'
       >
         {this.state.initDone &&
           <Tabs
