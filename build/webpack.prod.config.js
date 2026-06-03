@@ -10,11 +10,11 @@ const { hasReadme, getPackageJsonInfo, getPluginId, getTodayDate } = require('./
 const REPORT = process.env.REPORT
 const prodConfig = {
   mode: 'production',
-  devtool: 'eval-source-map',
+  devtool: false,
   output: {
     clean: true,
     path: path.join(__dirname, '..', 'dist'),
-    filename: '[name].[contenthash].js',
+    filename: 'static/[name].js',
     library: {
       type: 'amd',
     },
@@ -45,7 +45,7 @@ const prodConfig = {
   ],
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '[name].[contenthash].css',
+      filename: 'static/[name].css',
     }),
     new CopyWebpackPlugin({
       patterns: [
