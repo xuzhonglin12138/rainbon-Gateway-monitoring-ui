@@ -1,7 +1,7 @@
 {
   "type": "page-app",
-  "name": "rainbod-demo",
-  "id": "rainbod-demo",
+  "name": "rainbond-gateway-monitoring",
+  "id": "rainbond-gateway-monitoring",
   "version": "%VERSION%",
   "updated": "%TODAY%",
   "to": "/plugins/%PLUGIN_ID%"

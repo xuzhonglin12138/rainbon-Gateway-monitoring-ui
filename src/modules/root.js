@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { ConfigProvider, notification } from 'antd'
-import Content from '../pages/Content/index'
+import Content from '../pages/content/index'
 import intl from 'react-intl-universal';
 import dayjs from 'dayjs';
 import enUS from 'antd/locale/en_US';

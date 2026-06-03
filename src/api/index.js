@@ -27,3 +27,102 @@ export async function createStorage(data) {
     data,
   })
 }
+
+const apiPath = path => `${getBasePath()}/api/v1${path}`
+
+const queryString = params => {
+  const search = new URLSearchParams()
+  Object.keys(params || {}).forEach(key => {
+    const value = params[key]
+    if (value !== undefined && value !== null && value !== '') {
+      search.append(key, value)
+    }
+  })
+  const text = search.toString()
+  return text ? `?${text}` : ''
+}
+
+export async function getPlatformOverview(params = {}) {
+  return request(apiPath(`/platform/overview${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformTopErrors(params = {}) {
+  return request(apiPath(`/platform/internal-routes/top-errors${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformTopLatency(params = {}) {
+  return request(apiPath(`/platform/internal-routes/top-latency${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformNodeSummary(params = {}) {
+  return request(apiPath(`/platform/nodes/summary${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformNodeDetail(nodeName, params = {}) {
+  return request(apiPath(`/platform/nodes/${encodeURIComponent(nodeName)}/detail${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppOverview(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/overview${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppSLA(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/sla${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppRouteSummary(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/internal-routes/summary${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppTopErrors(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/internal-routes/top-errors${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppTopLatency(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/internal-routes/top-latency${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppComponentSummary(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/components/summary${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function syncAppHTTPLogger(appID, data) {
+  return request(apiPath(`/apps/${appID}/gateway/http-logger/sync`), {
+    method: 'post',
+    data,
+  })
+}
+
+export async function getComponentOverview(componentID, params = {}) {
+  return request(apiPath(`/components/${componentID}/overview${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getComponentInternalRoutes(componentID, params = {}) {
+  return request(apiPath(`/components/${componentID}/internal-routes${queryString(params)}`), {
+    method: 'get',
+  })
+}

@@ -34,42 +34,9 @@
   margin-bottom: 12px;
 }
 
-.slaCard,
-.metricCard,
-.sectionCard {
-  border-radius: 6px !important;
-}
-
-.slaCard {
-  min-height: 128px;
-}
-
-.slaHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.slaValue {
-  margin-top: 8px;
-  color: var(--rbd-heading-color, #495464);
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 36px;
-}
-
-.slaMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-top: 14px;
-  color: var(--rbd-text-color-secondary, #676f83);
-  font-size: 12px;
-}
-
 .metricCard {
-  height: 128px;
+  height: 104px;
+  border-radius: 6px !important;
 }
 
 .metricTitle {
@@ -90,14 +57,24 @@
   margin-top: 12px;
 }
 
+.sectionCard {
+  border-radius: 6px !important;
+}
+
 .routeText {
   display: inline-block;
-  max-width: 280px;
+  max-width: 360px;
   overflow: hidden;
   color: var(--rbd-text-color, #495464);
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.evidence {
+  margin-top: 12px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
 }
 
 :global {
