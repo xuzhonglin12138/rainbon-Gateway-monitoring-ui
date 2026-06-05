@@ -1,11 +1,25 @@
 import request from '../utils/request'
 import pluginData from '../pluginData.json'
 
+let runtimeBaseInfo = {}
+
+export const setNetworkMonitoringBaseInfo = baseInfo => {
+  runtimeBaseInfo = baseInfo || {}
+}
+
 // 从地址栏获取 regionName 参数
 const getRegionID = () => {
+  if (runtimeBaseInfo.region_name || runtimeBaseInfo.regionName) {
+    return runtimeBaseInfo.region_name || runtimeBaseInfo.regionName
+  }
   const hash = window.location.hash
   const searchParams = new URLSearchParams(hash.split('?')[1] || '')
-  return searchParams.get('regionName') || 'rainbond'
+  const queryRegion = searchParams.get('regionName')
+  if (queryRegion) {
+    return queryRegion
+  }
+  const pathMatch = hash.match(/\/region\/([^/]+)/)
+  return pathMatch ? pathMatch[1] : 'rainbond'
 }
 
 // 基础路径配置
@@ -48,6 +62,12 @@ export async function getPlatformOverview(params = {}) {
   })
 }
 
+export async function getPlatformOverviewTrend() {
+  return request(apiPath('/platform/overview/trend'), {
+    method: 'get',
+  })
+}
+
 export async function getPlatformTopErrors(params = {}) {
   return request(apiPath(`/platform/internal-routes/top-errors${queryString(params)}`), {
     method: 'get',
@@ -56,6 +76,24 @@ export async function getPlatformTopErrors(params = {}) {
 
 export async function getPlatformTopLatency(params = {}) {
   return request(apiPath(`/platform/internal-routes/top-latency${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformAppTopErrors(params = {}) {
+  return request(apiPath(`/platform/apps/top-errors${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformAppTopLatency(params = {}) {
+  return request(apiPath(`/platform/apps/top-latency${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getPlatformAppTopThroughput(params = {}) {
+  return request(apiPath(`/platform/apps/top-throughput${queryString(params)}`), {
     method: 'get',
   })
 }
@@ -74,6 +112,12 @@ export async function getPlatformNodeDetail(nodeName, params = {}) {
 
 export async function getAppOverview(appID, params = {}) {
   return request(apiPath(`/apps/${appID}/overview${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getAppOverviewTrend(appID) {
+  return request(apiPath(`/apps/${appID}/overview/trend`), {
     method: 'get',
   })
 }
@@ -115,8 +159,20 @@ export async function syncAppHTTPLogger(appID, data) {
   })
 }
 
+export async function getConsoleAppServices(teamName, appID) {
+  return request(`/console/teams/${teamName}/service/group?group_id=${appID}&page_size=200`, {
+    method: 'get',
+  })
+}
+
 export async function getComponentOverview(componentID, params = {}) {
   return request(apiPath(`/components/${componentID}/overview${queryString(params)}`), {
+    method: 'get',
+  })
+}
+
+export async function getComponentOverviewTrend(componentID) {
+  return request(apiPath(`/components/${componentID}/overview/trend`), {
     method: 'get',
   })
 }

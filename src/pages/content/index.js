@@ -4,9 +4,13 @@ import {
   getPlatformNodeDetail,
   getPlatformNodeSummary,
   getPlatformOverview,
-  getPlatformTopErrors,
-  getPlatformTopLatency,
+  getPlatformOverviewTrend,
+  getPlatformAppTopErrors,
+  getPlatformAppTopLatency,
+  getPlatformAppTopThroughput,
+  setNetworkMonitoringBaseInfo,
 } from '../../api'
+import MetricTrend from '../../components/MetricTrend'
 import {
   WINDOW_OPTIONS,
   formatBytes,
@@ -14,9 +18,13 @@ import {
   formatNumber,
   formatPercent,
   formatPercentValue,
+  formatThroughput,
   getResponseData,
   getResponseList,
+  getResponseTrendPoints,
   getResponseWarnings,
+  displayText,
+  resolvePlatformContext,
 } from '../../utils/networkMonitoring'
 import styles from './index.less'
 
@@ -26,24 +34,31 @@ export default class index extends Component {
     this.state = {
       window: '5m',
       loading: false,
+      realtimeLoading: false,
       overview: {},
-      topErrors: [],
-      topLatency: [],
+      trendPoints: [],
+      topAppErrors: [],
+      topAppLatency: [],
+      topAppThroughput: [],
       nodes: [],
       nodeDetail: {},
       nodeDetailVisible: false,
       nodeDetailLoading: false,
       warnings: [],
+      realtimeWarning: '',
     }
   }
 
   componentDidMount() {
+    setNetworkMonitoringBaseInfo(this.props?.baseInfo)
+    this.fetchRealtimeData()
     this.fetchData()
+    this.realtimeTimer = setInterval(this.fetchRealtimeData, 5000)
   }
 
   componentWillUnmount() {
-    if (this.timer) {
-      clearInterval(this.timer)
+    if (this.realtimeTimer) {
+      clearInterval(this.realtimeTimer)
     }
   }
 
@@ -56,21 +71,21 @@ export default class index extends Component {
     this.setState({ loading: true })
     try {
       const params = { window, limit: 10 }
-      const [overview, topErrors, topLatency, nodes] = await Promise.all([
-        getPlatformOverview(params),
-        getPlatformTopErrors(params),
-        getPlatformTopLatency(params),
+      const [topAppErrors, topAppLatency, topAppThroughput, nodes] = await Promise.all([
+        getPlatformAppTopErrors(params),
+        getPlatformAppTopLatency(params),
+        getPlatformAppTopThroughput(params),
         getPlatformNodeSummary({ window }),
       ])
       this.setState({
-        overview: getResponseData(overview),
-        topErrors: getResponseList(topErrors),
-        topLatency: getResponseList(topLatency),
+        topAppErrors: getResponseList(topAppErrors),
+        topAppLatency: getResponseList(topAppLatency),
+        topAppThroughput: getResponseList(topAppThroughput),
         nodes: getResponseList(nodes),
         warnings: [
-          ...getResponseWarnings(overview),
-          ...getResponseWarnings(topErrors),
-          ...getResponseWarnings(topLatency),
+          ...getResponseWarnings(topAppErrors),
+          ...getResponseWarnings(topAppLatency),
+          ...getResponseWarnings(topAppThroughput),
           ...getResponseWarnings(nodes),
         ],
       })
@@ -80,6 +95,27 @@ export default class index extends Component {
       })
     } finally {
       this.setState({ loading: false })
+    }
+  }
+
+  fetchRealtimeData = async () => {
+    this.setState({ realtimeLoading: true })
+    try {
+      const [overview, trend] = await Promise.all([
+        getPlatformOverview({ window: '5m', limit: 10 }),
+        getPlatformOverviewTrend(),
+      ])
+      this.setState({
+        overview: getResponseData(overview),
+        trendPoints: getResponseTrendPoints(trend),
+        realtimeWarning: '',
+      })
+    } catch (error) {
+      this.setState({
+        realtimeWarning: '平台级实时网络指标暂时不可用',
+      })
+    } finally {
+      this.setState({ realtimeLoading: false })
     }
   }
 
@@ -109,21 +145,38 @@ export default class index extends Component {
     this.setState({ nodeDetailVisible: false })
   }
 
+  jumpToAppGateway = record => {
+    const appID = record?.app_id
+    if (!appID) {
+      return
+    }
+    const context = resolvePlatformContext(this.props)
+    const teamName = record.team_name || record.team_id || record.namespace || context.teamName
+    const regionName = record.region_name || context.regionName
+    if (!teamName || !regionName) {
+      return
+    }
+    window.location.hash = `/team/${encodeURIComponent(teamName)}/region/${encodeURIComponent(regionName)}/apps/${encodeURIComponent(appID)}/gateway`
+  }
+
   renderMetricCards() {
-    const { overview } = this.state
+    const { overview, realtimeLoading, trendPoints } = this.state
     const cards = [
-      { title: '总请求量', value: formatNumber(overview.request_count) },
-      { title: '出口流量速率', value: formatBytes(overview.egress_bytes_per_sec) },
-      { title: '整体错误率', value: formatPercent(overview.error_rate) },
-      { title: '平均延迟', value: formatLatency(overview.avg_latency_ms) },
+      { title: '总请求量', value: formatNumber(overview.request_count), metric: 'request_per_second' },
+      { title: '出口流量速率', value: formatBytes(overview.egress_bytes_per_sec), metric: 'egress_bytes_per_sec' },
+      { title: '整体错误率', value: formatPercent(overview.error_rate), metric: 'error_rate' },
+      { title: '平均延迟', value: formatLatency(overview.avg_latency_ms), metric: 'avg_latency_ms' },
     ]
     return (
       <Row gutter={[12, 12]}>
         {cards.map(item => (
           <Col xs={24} sm={12} lg={6} key={item.title}>
             <Card className={styles.metricCard}>
-              <div className={styles.metricTitle}>{item.title}</div>
-              <div className={styles.metricValue}>{item.value}</div>
+              <Spin spinning={realtimeLoading}>
+                <div className={styles.metricTitle}>{item.title}</div>
+                <div className={styles.metricValue}>{item.value}</div>
+                <MetricTrend points={trendPoints} metric={item.metric} />
+              </Spin>
             </Card>
           </Col>
         ))}
@@ -131,20 +184,37 @@ export default class index extends Component {
     )
   }
 
-  renderRouteTable(title, dataSource, type) {
+  renderAppTable(title, dataSource, type) {
     const columns = [
       {
-        title: '内部路由',
-        dataIndex: 'route_group',
-        key: 'route_group',
-        render: value => <span className={styles.routeText}>{value || '-'}</span>,
+        title: '应用',
+        dataIndex: 'name',
+        key: 'name',
+        render: (value, record) => (
+          <span className={styles.routeText}>{displayText(record.app_name, value, record.app_id, '-')}</span>
+        ),
       },
       {
-        title: type === 'latency' ? '平均耗时' : '错误率',
-        dataIndex: type === 'latency' ? 'avg_latency_ms' : 'error_rate',
+        title: '所属团队',
+        dataIndex: 'team_alias',
+        key: 'team_alias',
+        width: 140,
+        render: (value, record) => displayText(value, record.team_name, record.team_id, record.namespace, '-'),
+      },
+      {
+        title: type === 'latency' ? '平均耗时' : type === 'throughput' ? '吞吐率' : '错误率',
+        dataIndex: type === 'latency' ? 'avg_latency_ms' : type === 'throughput' ? 'throughput_per_second' : 'error_rate',
         key: 'primary',
         width: 140,
-        render: value => type === 'latency' ? formatLatency(value) : formatPercent(value),
+        render: value => {
+          if (type === 'latency') {
+            return formatLatency(value)
+          }
+          if (type === 'throughput') {
+            return formatThroughput(value)
+          }
+          return formatPercent(value)
+        },
       },
       {
         title: '请求量',
@@ -165,11 +235,15 @@ export default class index extends Component {
       <Card title={title} className={styles.sectionCard}>
         <Table
           size="small"
-          rowKey={(record, index) => `${record.route_group || 'route'}-${index}`}
+          rowKey={(record, index) => `${record.app_id || 'app'}-${index}`}
           columns={columns}
           dataSource={dataSource}
           pagination={false}
-          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无聚合数据" /> }}
+          onRow={record => ({
+            onClick: () => this.jumpToAppGateway(record),
+            className: styles.clickableRow,
+          })}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无应用聚合数据" /> }}
         />
       </Card>
     )
@@ -254,13 +328,17 @@ export default class index extends Component {
   }
 
   render() {
-    const { loading, topErrors, topLatency, warnings, window } = this.state
+    const { loading, realtimeWarning, topAppErrors, topAppLatency, topAppThroughput, warnings, window } = this.state
+    const notice = [...warnings]
+    if (realtimeWarning) {
+      notice.push(realtimeWarning)
+    }
     return (
       <div className={styles.container}>
         <div className={styles.toolbar}>
           <div>
             <div className={styles.pageTitle}>平台级网络监控</div>
-            <div className={styles.pageDesc}>聚焦整个平台入口流量、错误热点和延迟热点</div>
+            <div className={styles.pageDesc}>聚焦整个平台入口流量、应用错误热点、应用延迟热点和应用吞吐热点</div>
           </div>
           <Radio.Group value={window} onChange={this.handleWindowChange} optionType="button" buttonStyle="solid">
             {WINDOW_OPTIONS.map(item => (
@@ -269,18 +347,21 @@ export default class index extends Component {
           </Radio.Group>
         </div>
 
-        {warnings.length > 0 && (
-          <Alert className={styles.notice} type="warning" showIcon message={warnings.join('；')} />
+        {notice.length > 0 && (
+          <Alert className={styles.notice} type="warning" showIcon message={notice.join('；')} />
         )}
 
         <Spin spinning={loading}>
           {this.renderMetricCards()}
           <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={12}>
-              {this.renderRouteTable('错误内部路由 Top10', topErrors, 'errors')}
+            <Col xs={24} lg={8}>
+              {this.renderAppTable('应用错误排行 Top10', topAppErrors, 'errors')}
             </Col>
-            <Col xs={24} lg={12}>
-              {this.renderRouteTable('耗时内部路由 Top10', topLatency, 'latency')}
+            <Col xs={24} lg={8}>
+              {this.renderAppTable('应用延迟排行 Top10', topAppLatency, 'latency')}
+            </Col>
+            <Col xs={24} lg={8}>
+              {this.renderAppTable('应用吞吐率排行 Top10', topAppThroughput, 'throughput')}
             </Col>
           </Row>
           <div className={styles.contentGrid}>

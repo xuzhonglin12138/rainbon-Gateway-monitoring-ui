@@ -3,7 +3,10 @@ import { Alert, Card, Col, Empty, Radio, Row, Spin, Table, Tag } from 'antd'
 import {
   getComponentInternalRoutes,
   getComponentOverview,
+  getComponentOverviewTrend,
+  setNetworkMonitoringBaseInfo,
 } from '../../api'
+import MetricTrend from '../../components/MetricTrend'
 import {
   WINDOW_OPTIONS,
   formatBytes,
@@ -12,6 +15,7 @@ import {
   formatPercent,
   getResponseData,
   getResponseList,
+  getResponseTrendPoints,
   getResponseWarnings,
   resolveComponentContext,
   sortByErrors,
@@ -25,14 +29,26 @@ export default class index extends Component {
     this.state = {
       window: '5m',
       loading: false,
+      realtimeLoading: false,
       overview: {},
+      trendPoints: [],
       routes: [],
       warnings: [],
+      realtimeWarning: '',
     }
   }
 
   componentDidMount() {
+    setNetworkMonitoringBaseInfo(this.props?.baseInfo)
+    this.fetchRealtimeData()
     this.fetchData()
+    this.realtimeTimer = setInterval(this.fetchRealtimeData, 5000)
+  }
+
+  componentWillUnmount() {
+    if (this.realtimeTimer) {
+      clearInterval(this.realtimeTimer)
+    }
   }
 
   handleWindowChange = e => {
@@ -49,15 +65,12 @@ export default class index extends Component {
     this.setState({ loading: true })
     try {
       const params = { window, limit: 50 }
-      const [overview, routes] = await Promise.all([
-        getComponentOverview(context.componentID, params),
+      const [routes] = await Promise.all([
         getComponentInternalRoutes(context.componentID, params),
       ])
       this.setState({
-        overview: getResponseData(overview),
         routes: getResponseList(routes),
         warnings: [
-          ...getResponseWarnings(overview),
           ...getResponseWarnings(routes),
         ],
       })
@@ -68,21 +81,47 @@ export default class index extends Component {
     }
   }
 
+  fetchRealtimeData = async () => {
+    const context = resolveComponentContext(this.props)
+    if (!context.componentID) {
+      return
+    }
+    this.setState({ realtimeLoading: true })
+    try {
+      const [overview, trend] = await Promise.all([
+        getComponentOverview(context.componentID, { window: '5m', limit: 50 }),
+        getComponentOverviewTrend(context.componentID),
+      ])
+      this.setState({
+        overview: getResponseData(overview),
+        trendPoints: getResponseTrendPoints(trend),
+        realtimeWarning: '',
+      })
+    } catch (error) {
+      this.setState({ realtimeWarning: '组件级实时网络指标暂时不可用' })
+    } finally {
+      this.setState({ realtimeLoading: false })
+    }
+  }
+
   renderMetricCards() {
-    const { overview } = this.state
+    const { overview, realtimeLoading, trendPoints } = this.state
     const cards = [
-      { title: '吞吐率', value: `${formatNumber(overview.throughput_per_second)} req/s` },
-      { title: '平均响应时间', value: formatLatency(overview.avg_latency_ms) },
-      { title: '出口流量速率', value: formatBytes(overview.network_transmit_bps || overview.egress_bytes_per_sec) },
-      { title: '入口错误率', value: formatPercent(overview.error_rate) },
+      { title: '总请求量', value: formatNumber(overview.request_count), metric: 'request_per_second' },
+      { title: '出口流量速率', value: formatBytes(overview.network_transmit_bps || overview.egress_bytes_per_sec), metric: 'egress_bytes_per_sec' },
+      { title: '整体错误率', value: formatPercent(overview.error_rate), metric: 'error_rate' },
+      { title: '平均延迟', value: formatLatency(overview.avg_latency_ms), metric: 'avg_latency_ms' },
     ]
     return (
       <Row gutter={[12, 12]}>
         {cards.map(item => (
           <Col xs={24} sm={12} lg={6} key={item.title}>
             <Card className={styles.metricCard}>
-              <div className={styles.metricTitle}>{item.title}</div>
-              <div className={styles.metricValue}>{item.value}</div>
+              <Spin spinning={realtimeLoading}>
+                <div className={styles.metricTitle}>{item.title}</div>
+                <div className={styles.metricValue}>{item.value}</div>
+                <MetricTrend points={trendPoints} metric={item.metric} />
+              </Spin>
             </Card>
           </Col>
         ))}
@@ -135,10 +174,14 @@ export default class index extends Component {
   }
 
   render() {
-    const { loading, overview, routes, warnings, window } = this.state
+    const { loading, overview, realtimeWarning, routes, warnings, window } = this.state
     const context = resolveComponentContext(this.props)
     const errorRoutes = sortByErrors(routes).slice(0, 10)
     const latencyRoutes = sortByLatency(routes).slice(0, 10)
+    const notice = [...warnings]
+    if (realtimeWarning) {
+      notice.push(realtimeWarning)
+    }
     return (
       <div className={styles.container}>
         <div className={styles.toolbar}>
@@ -153,8 +196,8 @@ export default class index extends Component {
           </Radio.Group>
         </div>
 
-        {warnings.length > 0 && (
-          <Alert className={styles.notice} type="warning" showIcon message={warnings.join('；')} />
+        {notice.length > 0 && (
+          <Alert className={styles.notice} type="warning" showIcon message={notice.join('；')} />
         )}
 
         <Spin spinning={loading}>

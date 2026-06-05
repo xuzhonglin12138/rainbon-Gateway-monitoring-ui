@@ -71,6 +71,6 @@
     "react-dom": "^16.8.6",
     "react-intl-universal": "^2.11.3",
     "swc-loader": "^0.2.6",
-    "xu-demo-data": "3.0.1"
+    "xu-demo-data": "3.0.2"
   }
 }
