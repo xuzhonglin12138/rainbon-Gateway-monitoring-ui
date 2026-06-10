@@ -30,13 +30,27 @@
   font-size: 12px;
 }
 
+.toolbarControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .notice {
   margin-bottom: 12px;
 }
 
 .metricCard {
-  height: 158px;
+  height: 220px;
   border-radius: 6px !important;
+}
+
+.metricCard :global(.demo-ant-card-body) {
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .metricTitle {
@@ -51,6 +65,28 @@
   font-weight: 600;
   line-height: 30px;
   word-break: break-word;
+}
+
+.metricMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.metricMeta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metricMeta span:last-child {
+  text-align: right;
 }
 
 .contentGrid {
@@ -95,5 +131,15 @@
 
   .demo-ant-card-body {
     padding: 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .metricMeta {
+    flex-wrap: wrap;
+  }
+
+  .metricMeta span:last-child {
+    text-align: left;
   }
 }

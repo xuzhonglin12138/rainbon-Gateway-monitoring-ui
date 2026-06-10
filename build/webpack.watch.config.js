@@ -6,7 +6,7 @@ const prodConfig = require('./webpack.prod.config')
 // ============================================================
 // 配置：修改这里指向你的主项目插件目录
 // ============================================================
-const MAIN_PROJECT_PLUGIN_PATH = path.resolve(__dirname, '../../6.28/rainbond-ui/public/plugins/dist')
+const MAIN_PROJECT_PLUGIN_PATH = path.resolve(__dirname, '../../rainbond-ui/public/plugins/dist')
 // ============================================================
 
 // 自定义插件：构建完成后复制文件

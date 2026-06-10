@@ -62,8 +62,8 @@ export async function getPlatformOverview(params = {}) {
   })
 }
 
-export async function getPlatformOverviewTrend() {
-  return request(apiPath('/platform/overview/trend'), {
+export async function getPlatformOverviewTrend(params = {}) {
+  return request(apiPath(`/platform/overview/trend${queryString(params)}`), {
     method: 'get',
   })
 }
@@ -116,8 +116,8 @@ export async function getAppOverview(appID, params = {}) {
   })
 }
 
-export async function getAppOverviewTrend(appID) {
-  return request(apiPath(`/apps/${appID}/overview/trend`), {
+export async function getAppOverviewTrend(appID, params = {}) {
+  return request(apiPath(`/apps/${appID}/overview/trend${queryString(params)}`), {
     method: 'get',
   })
 }
@@ -171,8 +171,8 @@ export async function getComponentOverview(componentID, params = {}) {
   })
 }
 
-export async function getComponentOverviewTrend(componentID) {
-  return request(apiPath(`/components/${componentID}/overview/trend`), {
+export async function getComponentOverviewTrend(componentID, params = {}) {
+  return request(apiPath(`/components/${componentID}/overview/trend${queryString(params)}`), {
     method: 'get',
   })
 }

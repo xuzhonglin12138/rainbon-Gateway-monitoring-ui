@@ -14,7 +14,7 @@ const prodConfig = {
   output: {
     clean: true,
     path: path.join(__dirname, '..', 'dist'),
-    filename: 'static/[name].js',
+    filename: '[name].js',
     library: {
       type: 'amd',
     },

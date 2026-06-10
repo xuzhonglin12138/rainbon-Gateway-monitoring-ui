@@ -1,8 +1,6 @@
 .container {
-  min-height: 100%;
-  padding: 16px;
+  min-height: 100vh;
   box-sizing: border-box;
-  background: var(--rbd-background-color, #f7f8fa);
 }
 
 .toolbar {
@@ -28,6 +26,14 @@
   margin-top: 2px;
   color: var(--rbd-text-color-secondary, #676f83);
   font-size: 12px;
+}
+
+.toolbarControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .notice {
@@ -69,7 +75,13 @@
 }
 
 .metricCard {
-  height: 158px;
+  height: 220px;
+}
+
+.metricCard :global(.demo-ant-card-body) {
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .metricTitle {
@@ -86,8 +98,58 @@
   word-break: break-word;
 }
 
+.metricMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.metricMeta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metricMeta span:last-child {
+  text-align: right;
+}
+
 .contentGrid {
   margin-top: 12px;
+}
+
+.cellStack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.primaryText {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--rbd-text-color, #495464);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secondaryText {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .routeText {
@@ -98,6 +160,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover td {
+  background: #f5f8ff !important;
 }
 
 :global {
@@ -118,5 +188,15 @@
 
   .demo-ant-card-body {
     padding: 16px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .metricMeta {
+    flex-wrap: wrap;
+  }
+
+  .metricMeta span:last-child {
+    text-align: left;
   }
 }
