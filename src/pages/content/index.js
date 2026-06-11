@@ -434,7 +434,7 @@ export default class index extends Component {
       <div className={styles.container}>
         <div className={styles.toolbar}>
           <div>
-            <div className={styles.pageTitle}>平台级网络监控</div>
+            <div className={styles.pageTitle}>网关监测</div>
             <div className={styles.pageDesc}>聚焦整个平台入口流量、应用错误热点、应用延迟热点和团队吞吐热点</div>
           </div>
           <div className={styles.toolbarControls}>

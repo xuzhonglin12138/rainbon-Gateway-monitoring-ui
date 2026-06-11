@@ -5,12 +5,10 @@
 .toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
-  margin-bottom: 12px;
-  padding: 12px 16px;
+  padding: 0 0 12px;
   background: #fff;
-  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
   border-radius: 12px;
 }
 
@@ -125,6 +123,53 @@
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
+}
+
+.routeTable {
+  width: 100%;
+}
+
+.routeTable :global(.demo-ant-table-container) {
+  border-radius: 8px;
+}
+
+.routeTable :global(.demo-ant-table-cell) {
+  white-space: nowrap;
+}
+
+.routeTable :global(.demo-ant-table-thead > tr > th) {
+  background: #f8fbff;
+  font-weight: 700;
+}
+
+.routeTable :global(.demo-ant-table-cell-fix-left),
+.routeTable :global(.demo-ant-table-cell-fix-left-first),
+.routeTable :global(.demo-ant-table-cell-fix-left-last),
+.routeTable :global(.demo-ant-table-cell-fix-right),
+.routeTable :global(.demo-ant-table-cell-fix-right-first),
+.routeTable :global(.demo-ant-table-cell-fix-right-last) {
+  background: #fff;
+}
+
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-left),
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-left-first),
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-left-last),
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-right),
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-right-first),
+.routeTable :global(.demo-ant-table-thead .demo-ant-table-cell-fix-right-last) {
+  background: #f8fbff;
+}
+
+.tableRouteName {
+  display: block;
+  max-width: 260px;
+  overflow: hidden;
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rankingList {

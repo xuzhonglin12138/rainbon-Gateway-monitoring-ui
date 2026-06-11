@@ -5,7 +5,6 @@ import {
   getAppComponentSummary,
   getAppOverview,
   getAppOverviewTrend,
-  getAppRouteSummary,
   getAppSLA,
   getAppTopErrors,
   getAppTopLatency,
@@ -49,7 +48,6 @@ export default class index extends Component {
       overview: {},
       trendPoints: [],
       sla: {},
-      summary: [],
       topErrors: [],
       topLatency: [],
       components: [],
@@ -153,23 +151,20 @@ export default class index extends Component {
     }
     try {
       const params = buildWindowQueryParams(window, { limit: 10 })
-      const [sla, summary, topErrors, topLatency, components] = await Promise.all([
+      const [sla, topErrors, topLatency, components] = await Promise.all([
         this.safeRequest(getAppSLA(context.appID, params)),
-        this.safeRequest(getAppRouteSummary(context.appID, params)),
         this.safeRequest(getAppTopErrors(context.appID, params)),
         this.safeRequest(getAppTopLatency(context.appID, params)),
         this.safeRequest(getAppComponentSummary(context.appID, buildWindowQueryParams(window, { limit: 50 }))),
       ])
       const warnings = [
         ...this.getResultWarnings(sla, '应用 SLA 暂时不可用'),
-        ...this.getResultWarnings(summary, '应用内部路由汇总暂时不可用'),
         ...this.getResultWarnings(topErrors, '应用内部错误路由排序暂时不可用'),
         ...this.getResultWarnings(topLatency, '应用内部慢路由排序暂时不可用'),
         ...this.getResultWarnings(components, '应用组件汇总暂时不可用'),
       ]
       this.setState({
         sla: this.getResultData(sla, {}),
-        summary: this.getResultList(summary),
         topErrors: this.getResultList(topErrors),
         topLatency: this.getResultList(topLatency),
         components: this.getResultList(components),
@@ -500,7 +495,7 @@ export default class index extends Component {
   }
 
   render() {
-    const { loading, realtimeWarning, refreshInterval, summary, topErrors, topLatency, warnings, window } = this.state
+    const { loading, realtimeWarning, refreshInterval, topErrors, topLatency, warnings, window } = this.state
     const notice = [...warnings]
     if (realtimeWarning) {
       notice.push(realtimeWarning)
@@ -509,7 +504,7 @@ export default class index extends Component {
       <div className={styles.container}>
         <div className={styles.toolbar}>
           <div>
-            <div className={styles.pageTitle}>应用级网络监控</div>
+            <div className={styles.pageTitle}>应用流量</div>
             <div className={styles.pageDesc}>聚焦当前应用的入口流量、内部路由质量、组件错误和响应延迟情况</div>
           </div>
           <div className={styles.toolbarControls}>
@@ -542,16 +537,13 @@ export default class index extends Component {
 
         <Spin spinning={loading}>
           <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={12}>
+            <Col xs={24}>
               {this.renderComponentTable()}
-            </Col>
-            <Col xs={24} lg={12}>
-              {this.renderLatencyRouteTable(topLatency)}
             </Col>
           </Row>
           <Row gutter={[12, 12]} className={styles.contentGrid}>
             <Col xs={24} lg={12}>
-              {this.renderRequestRouteTable(summary)}
+              {this.renderLatencyRouteTable(topLatency)}
             </Col>
             <Col xs={24} lg={12}>
               {this.renderErrorRouteTable(topErrors)}

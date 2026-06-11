@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert, Card, Col, Empty, Radio, Row, Select, Spin, Tooltip } from 'antd'
+import { Alert, Card, Col, Radio, Row, Select, Spin, Table, Tooltip } from 'antd'
 import {
   getComponentInternalRoutes,
   getComponentOverview,
@@ -18,6 +18,7 @@ import {
   buildWindowQueryParams,
   getPeakTrendValues,
   getRealtimeMetricPoint,
+  getRouteThroughput,
   getResponseData,
   getResponseList,
   getResponseTrendPoints,
@@ -196,77 +197,117 @@ export default class index extends Component {
     )
   }
 
-  renderRouteRankingCard({ dataSource, emptyText, getItem, title }) {
+  renderRouteTable({ columns, dataSource, emptyText, title }) {
     const list = Array.isArray(dataSource) ? dataSource : []
     return (
       <Card className={`${styles.sectionCard} ${styles.rankingCard}`}>
         <div className={styles.rankingHeader}>
           <div className={styles.sectionTitle}>{title}</div>
         </div>
-        <div className={styles.rankingList}>
-          {list.length ? list.map((record, index) => {
-            const item = getItem(record)
-
-            return (
-              <div className={styles.rankingListItem} key={item.key || index}>
-                <div className={styles.rankingIdentity}>
-                  <span className={styles.rankingIndex}>{String(index + 1).padStart(2, '0')}</span>
-                  {this.renderTextWithTooltip(item.name, styles.rankingName)}
-                </div>
-                <div className={styles.rankingMetricList}>
-                  {item.metrics.map(metric => (
-                    <div className={styles.rankingMetric} key={metric.label}>
-                      {this.renderTextWithTooltip(metric.label, styles.rankingMetricLabel)}
-                      {this.renderTextWithTooltip(metric.value, `${styles.rankingMetricValue} ${metric.danger ? styles.rankingMetricDanger : ''}`)}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          }) : (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} />
-          )}
-        </div>
+        <Table
+          className={styles.routeTable}
+          columns={columns}
+          dataSource={list}
+          locale={{ emptyText }}
+          pagination={false}
+          rowKey={(record, index) => `${displayText(record.route_group, 'route')}-${index}`}
+          scroll={{ x: 720, y: 320 }}
+          size="small"
+        />
       </Card>
     )
   }
 
   renderErrorRouteTable(dataSource) {
-    return this.renderRouteRankingCard({
+    return this.renderRouteTable({
       dataSource,
       emptyText: '暂无错误聚合数据',
       title: '错误排行',
-      getItem: record => ({
-        key: record.route_group,
-        name: displayText(record.route_group, '-'),
-        metrics: [
-          { label: '错误总数', value: formatNumber(record.error_count), danger: Number(record.error_count || 0) > 0 },
-          { label: '错误率', value: formatPercent(record.error_rate), danger: Number(record.error_rate || 0) > 0 },
-        ],
-      }),
+      columns: [
+        {
+          title: '#',
+          fixed: 'left',
+          width: 56,
+          render: (_, record, index) => <span className={styles.rankingIndex}>{String(index + 1).padStart(2, '0')}</span>,
+        },
+        {
+          title: '内部路由',
+          dataIndex: 'route_group',
+          fixed: 'left',
+          width: 260,
+          render: value => this.renderTextWithTooltip(displayText(value, '-'), styles.tableRouteName),
+        },
+        {
+          title: '错误总数',
+          dataIndex: 'error_count',
+          width: 120,
+          render: value => (
+            <span className={Number(value || 0) > 0 ? styles.rankingMetricDanger : ''}>{formatNumber(value)}</span>
+          ),
+        },
+        {
+          title: '请求总数',
+          dataIndex: 'request_count',
+          width: 120,
+          render: value => formatNumber(value),
+        },
+        {
+          title: '错误率',
+          dataIndex: 'error_rate',
+          fixed: 'right',
+          width: 120,
+          render: value => (
+            <span className={Number(value || 0) > 0 ? styles.rankingMetricDanger : ''}>{formatPercent(value)}</span>
+          ),
+        },
+      ],
     })
   }
 
   renderLatencyRouteTable(dataSource) {
     const { window } = this.state
-    return this.renderRouteRankingCard({
+    return this.renderRouteTable({
       dataSource,
       emptyText: '暂无耗时聚合数据',
       title: window === '5m' ? '过去 5 分钟耗时排行' : '耗时排行',
-      getItem: record => ({
-        key: record.route_group,
-        name: displayText(record.route_group, '-'),
-        metrics: [
-          { label: '平均耗时', value: formatLatency(record.avg_latency_ms) },
-          { label: '请求总数', value: formatNumber(record.request_count) },
-        ],
-      }),
+      columns: [
+        {
+          title: '#',
+          fixed: 'left',
+          width: 56,
+          render: (_, record, index) => <span className={styles.rankingIndex}>{String(index + 1).padStart(2, '0')}</span>,
+        },
+        {
+          title: '内部路由',
+          dataIndex: 'route_group',
+          fixed: 'left',
+          width: 260,
+          render: value => this.renderTextWithTooltip(displayText(value, '-'), styles.tableRouteName),
+        },
+        {
+          title: '吞吐率',
+          width: 120,
+          render: (_, record) => formatThroughput(getRouteThroughput(record, window)),
+        },
+        {
+          title: '请求总数',
+          dataIndex: 'request_count',
+          width: 120,
+          render: value => formatNumber(value),
+        },
+        {
+          title: '平均耗时',
+          dataIndex: 'avg_latency_ms',
+          fixed: 'right',
+          width: 120,
+          render: value => formatLatency(value),
+        },
+      ],
     })
   }
 
   render() {
     const { loading, realtimeWarning, refreshInterval, routes, warnings, window } = this.state
-    const context = resolveComponentContext(this.props)
     const errorRoutes = sortByErrors(routes).slice(0, 10)
     const latencyRoutes = sortByLatency(routes).slice(0, 10)
     const notice = [...warnings]
@@ -276,10 +317,6 @@ export default class index extends Component {
     return (
       <div className={styles.container}>
         <div className={styles.toolbar}>
-          <div>
-            <div className={styles.pageTitle}>组件级网络监控</div>
-            <div className={styles.pageDesc}>{context.name} · {context.appName || '应用上下文未识别'}</div>
-          </div>
           <div className={styles.toolbarControls}>
             <Radio.Group value={window} onChange={this.handleWindowChange} optionType="button" buttonStyle="solid">
               {WINDOW_OPTIONS.map(item => (
@@ -303,11 +340,11 @@ export default class index extends Component {
 
         <Spin spinning={loading}>
           <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={12}>
-              {this.renderErrorRouteTable(errorRoutes)}
-            </Col>
-            <Col xs={24} lg={12}>
+            <Col xs={24}>
               {this.renderLatencyRouteTable(latencyRoutes)}
+            </Col>
+            <Col xs={24}>
+              {this.renderErrorRouteTable(errorRoutes)}
             </Col>
           </Row>
         </Spin>
