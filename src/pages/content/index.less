@@ -1,6 +1,5 @@
 .container {
-  min-height: 100vh;
-  box-sizing: border-box;
+  min-height: 80vh;
 }
 
 .toolbar {
@@ -12,11 +11,11 @@
   padding: 12px 16px;
   background: #fff;
   border: 1px solid var(--rbd-border-color-base, #e2e2e2);
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .pageTitle {
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
   font-size: 18px;
   font-weight: 600;
   line-height: 26px;
@@ -41,8 +40,8 @@
 }
 
 .metricCard {
-  height: 220px;
-  border-radius: 6px !important;
+  height: 248px;
+  border-radius: 12px !important;
 }
 
 .metricCard :global(.demo-ant-card-body) {
@@ -58,7 +57,8 @@
 
 .metricValue {
   margin-top: 10px;
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 24px;
   font-weight: 600;
   line-height: 32px;
@@ -71,9 +71,11 @@
   justify-content: space-between;
   gap: 8px;
   margin-top: 8px;
+  padding-bottom: 8px;
   color: var(--rbd-text-color-secondary, #676f83);
   font-size: 12px;
   line-height: 18px;
+  border-bottom: var(--rbd-border-color-base, #e2e2e2) 1px solid;
 }
 
 .metricMeta span {
@@ -87,33 +89,124 @@
   text-align: right;
 }
 
+.metricNumber {
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.metricDesc {
+  display: -webkit-box;
+  min-height: 36px;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .contentGrid {
   margin-top: 12px;
 }
 
 .sectionCard {
-  border-radius: 6px !important;
+  border-radius: 12px !important;
 }
 
-.cellStack {
+.rankingCard :global(.demo-ant-card-body) {
+  padding: 12px !important;
+}
+
+.rankingHeader {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
-.primaryText {
-  display: inline-block;
-  max-width: 100%;
+.rankingTitle {
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.rankingDesc {
+  margin-top: 6px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rankingListItem {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) minmax(0, 2.4fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 62%);
+}
+
+.rankingIdentity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rankingIndex {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid #b9cdfb;
+  border-radius: 10px;
+  background: #eef4ff;
+}
+
+.rankingName {
+  display: block;
+  min-width: 0;
   overflow: hidden;
-  color: var(--rbd-text-color, #495464);
-  font-weight: 500;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.secondaryText {
-  display: inline-block;
+.rankingMetricList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(96px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.rankingMetric {
+  min-width: 0;
+}
+
+.rankingMetricLabel {
+  display: block;
   max-width: 100%;
   overflow: hidden;
   color: var(--rbd-text-color-secondary, #676f83);
@@ -123,34 +216,162 @@
   white-space: nowrap;
 }
 
-.routeText {
-  display: inline-block;
+.rankingMetricValue {
+  display: block;
+  min-width: 0;
   max-width: 100%;
+  margin-top: 4px;
   overflow: hidden;
-  color: var(--rbd-text-color, #495464);
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
-.nodeLink {
-  color: var(--rbd-primary-color, #155aef);
+.rankingMetricDanger {
+  color: #dc2627;
 }
 
-.clickableRow {
-  cursor: pointer;
+.rankingActionButton {
+  flex: 0 0 auto;
+  min-width: 72px;
+  height: 34px;
+  color: #111 !important;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 999px !important;
 }
 
-.clickableRow:hover td {
-  background: #f5f8ff !important;
+.nodeCard :global(.demo-ant-card-body) {
+  padding: 12px !important;
+}
+
+.nodeHeader {
+  margin-bottom: 12px;
+}
+
+.nodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nodeItem {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.1fr) minmax(0, 4fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 62%);
+}
+
+.nodeIdentity {
+  min-width: 0;
+}
+
+.nodeNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nodeName {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeStatus {
+  flex: 0 0 auto;
+  display: block;
+  max-width: 96px;
+  overflow: hidden;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  border-radius: 999px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeStatusReady {
+  color: #17a34a;
+  background: rgba(23, 163, 74, 0.1);
+}
+
+.nodeStatusWarning {
+  color: #ebb30b;
+  background: rgba(235, 179, 11, 0.12);
+}
+
+.nodeMetricList {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(86px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.nodeMetric {
+  min-width: 0;
+}
+
+.nodeMetricLabel {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeMetricValue {
+  display: block;
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeMetricDanger {
+  color: #dc2627;
+}
+
+.nodeMetricHint {
+  display: block;
+  max-width: 100%;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 11px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 :global {
-  .demo-ant-table-thead > tr > th {
-    background-color: var(--rbd-background-color, #f7f8fa) !important;
-    color: var(--rbd-text-color, #495464) !important;
-  }
-
   .demo-ant-card-head {
     min-height: 44px !important;
   }
@@ -166,6 +387,24 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .rankingListItem {
+    grid-template-columns: minmax(88px, 0.9fr) minmax(0, 2.2fr) auto;
+  }
+
+  .rankingMetricList {
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
+  }
+
+  .nodeItem {
+    grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+  }
+
+  .nodeMetricList {
+    grid-template-columns: repeat(3, minmax(96px, 1fr));
+  }
+}
+
 @media (max-width: 420px) {
   .metricMeta {
     flex-wrap: wrap;
@@ -173,5 +412,32 @@
 
   .metricMeta span:last-child {
     text-align: left;
+  }
+
+  .rankingHeader,
+  .rankingListItem {
+    align-items: stretch;
+  }
+
+  .rankingListItem {
+    grid-template-columns: 1fr auto;
+  }
+
+  .rankingIdentity {
+    grid-column: 1 / 2;
+  }
+
+  .rankingMetricList {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+  }
+
+  .nodeItem {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .nodeMetricList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -12,7 +12,7 @@ function loadNetworkMonitoring() {
   const filename = path.join(__dirname, 'networkMonitoring.js');
   let source = fs.readFileSync(filename, 'utf8');
   source = source.replace(/export const /g, 'const ');
-  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, buildComponentDisplayMap, getComponentDisplayName, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
+  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
   const mod = new Module(filename, module);
   mod.filename = filename;
   mod.paths = Module._nodeModulePaths(__dirname);
@@ -29,6 +29,8 @@ const {
   getTeamThroughputItems,
   getWindowSeconds,
   getRouteThroughput,
+  getDelayedQueryEndTime,
+  buildWindowQueryParams,
   buildComponentDisplayMap,
   getComponentDisplayName,
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -236,6 +238,16 @@ test('getRouteThroughput uses the selected query window', function () {
   assert.equal(getWindowSeconds('10m'), 600);
   assert.equal(getWindowSeconds('30m'), 1800);
   assert.equal(getRouteThroughput({ request_count: 600 }, '10m'), 1);
+});
+
+test('buildWindowQueryParams delays end_time by 6 seconds', function () {
+  const nineOClock = Date.UTC(2026, 0, 1, 9, 0, 0);
+  const params = buildWindowQueryParams('5m', { limit: 10 }, nineOClock);
+
+  assert.equal(params.window, '5m');
+  assert.equal(params.limit, 10);
+  assert.equal(params.end_time, Date.UTC(2026, 0, 1, 8, 59, 54) / 1000);
+  assert.equal(getDelayedQueryEndTime(nineOClock), params.end_time);
 });
 
 test('component display map resolves service alias to Chinese component name', function () {

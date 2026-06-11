@@ -12,6 +12,8 @@ export const REFRESH_INTERVAL_OPTIONS = [
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 5000
 
+export const QUERY_END_DELAY_SECONDS = 6
+
 export const getWindowLabel = value => {
   const option = WINDOW_OPTIONS.find(item => item.value === value)
   return option ? option.label : '当前时间段'
@@ -26,6 +28,14 @@ export const getWindowSeconds = value => {
   }
   return 300
 }
+
+export const getDelayedQueryEndTime = (now = Date.now()) => Math.floor(now / 1000) - QUERY_END_DELAY_SECONDS
+
+export const buildWindowQueryParams = (window, extra = {}, now = Date.now()) => ({
+  window,
+  end_time: getDelayedQueryEndTime(now),
+  ...extra,
+})
 
 export const getRouteThroughput = (record = {}, window) => {
   const seconds = getWindowSeconds(window)

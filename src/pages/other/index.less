@@ -1,6 +1,5 @@
 .container {
-  min-height: 100vh;
-  box-sizing: border-box;
+  min-height: 80vh;
 }
 
 .toolbar {
@@ -12,11 +11,12 @@
   padding: 12px 16px;
   background: #fff;
   border: 1px solid var(--rbd-border-color-base, #e2e2e2);
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .pageTitle {
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
+
   font-size: 18px;
   font-weight: 600;
   line-height: 26px;
@@ -43,11 +43,19 @@
 .slaCard,
 .metricCard,
 .sectionCard {
-  border-radius: 6px !important;
+  border-radius: 12px !important;
 }
 
 .slaCard {
-  min-height: 128px;
+  height: 248px;
+}
+
+.slaCard :global(.demo-ant-card-body) {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .slaHeader {
@@ -59,23 +67,84 @@
 
 .slaValue {
   margin-top: 8px;
-  color: var(--rbd-heading-color, #495464);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 30px;
   font-weight: 700;
   line-height: 36px;
 }
 
+.slaValueSuccess {
+  color: #17a34a;
+}
+
+.slaValueWarning {
+  color: #ebb30b;
+}
+
+.slaValueError {
+  color: #dc2627;
+}
+
 .slaMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 30px;
+  text-align: left;
+}
+
+.slaMetaItem {
+  min-width: 0;
+}
+
+.slaMetaKey {
+  display: block;
+  overflow: hidden;
   color: var(--rbd-text-color-secondary, #676f83);
   font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slaMetaValue {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slaMetaValueTarget {
+  color: #111;
+}
+
+.slaMetaValueSuccess {
+  color: #17a34a;
+}
+
+.slaMetaValueError {
+  color: #dc2627;
+}
+
+.slaDesc {
+  display: -webkit-box;
+  min-height: 36px;
+  margin-top: auto;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .metricCard {
-  height: 220px;
+  height: 248px;
 }
 
 .metricCard :global(.demo-ant-card-body) {
@@ -91,7 +160,8 @@
 
 .metricValue {
   margin-top: 10px;
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 22px;
   font-weight: 600;
   line-height: 30px;
@@ -120,29 +190,97 @@
   text-align: right;
 }
 
+.metricNumber {
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.metricDesc {
+  display: -webkit-box;
+  min-height: 36px;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .contentGrid {
   margin-top: 12px;
 }
 
-.cellStack {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
+.componentCard :global(.demo-ant-card-body) {
+  padding: 12px !important;
 }
 
-.primaryText {
-  display: inline-block;
-  max-width: 100%;
+.componentHeader {
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.sectionDesc {
+  margin-top: 6px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.componentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.componentItem {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 3fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 62%);
+}
+
+.componentIdentity {
+  min-width: 0;
+}
+
+.componentName {
+  display: block;
+  min-width: 0;
   overflow: hidden;
-  color: var(--rbd-text-color, #495464);
-  font-weight: 500;
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.secondaryText {
-  display: inline-block;
+.componentMetricList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.componentMetric {
+  min-width: 0;
+}
+
+.componentMetricLabel {
+  display: block;
   max-width: 100%;
   overflow: hidden;
   color: var(--rbd-text-color-secondary, #676f83);
@@ -152,30 +290,148 @@
   white-space: nowrap;
 }
 
-.routeText {
-  display: inline-block;
-  max-width: 280px;
+.componentMetricValue {
+  display: block;
+  max-width: 100%;
+  margin-top: 4px;
   overflow: hidden;
-  color: var(--rbd-text-color, #495464);
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
-.clickableRow {
-  cursor: pointer;
+.componentMetricDanger {
+  color: #dc2627;
 }
 
-.clickableRow:hover td {
-  background: #f5f8ff !important;
+.componentActionButton {
+  flex: 0 0 auto;
+  min-width: 72px;
+  height: 34px;
+  color: #111 !important;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 999px !important;
+}
+
+.rankingCard :global(.demo-ant-card-body) {
+  padding: 12px !important;
+}
+
+.rankingHeader {
+  margin-bottom: 12px;
+}
+
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rankingListItem {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(160px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 62%);
+}
+
+.rankingIdentity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rankingIndex {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid #b9cdfb;
+  border-radius: 10px;
+  background: #eef4ff;
+}
+
+.rankingName {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankingMetricList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(96px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.rankingMetric {
+  min-width: 0;
+}
+
+.rankingMetricLabel {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankingMetricValue {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankingMetricDanger {
+  color: #dc2627;
+}
+
+.rankingActionButton {
+  flex: 0 0 auto;
+  min-width: 64px;
+  height: 32px;
+  color: #111 !important;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px !important;
 }
 
 :global {
-  .demo-ant-table-thead > tr > th {
-    background-color: var(--rbd-background-color, #f7f8fa) !important;
-    color: var(--rbd-text-color, #495464) !important;
-  }
-
   .demo-ant-card-head {
     min-height: 44px !important;
   }
@@ -191,6 +447,24 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .rankingListItem {
+    grid-template-columns: minmax(0, 2fr) minmax(144px, 1fr) auto;
+  }
+
+  .rankingMetricList {
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
+  }
+
+  .componentItem {
+    grid-template-columns: minmax(120px, 0.8fr) minmax(0, 3fr) auto;
+  }
+
+  .componentMetricList {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 420px) {
   .metricMeta {
     flex-wrap: wrap;
@@ -198,5 +472,23 @@
 
   .metricMeta span:last-child {
     text-align: left;
+  }
+
+  .rankingListItem {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .rankingMetricList {
+    grid-template-columns: 1fr;
+  }
+
+  .componentItem {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .componentMetricList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

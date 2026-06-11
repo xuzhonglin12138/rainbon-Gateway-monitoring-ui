@@ -1,8 +1,5 @@
 .container {
-  min-height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-  background: var(--rbd-background-color, #f7f8fa);
+  min-height: 80vh;
 }
 
 .toolbar {
@@ -14,11 +11,11 @@
   padding: 12px 16px;
   background: #fff;
   border: 1px solid var(--rbd-border-color-base, #e2e2e2);
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .pageTitle {
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
   font-size: 18px;
   font-weight: 600;
   line-height: 26px;
@@ -43,8 +40,8 @@
 }
 
 .metricCard {
-  height: 220px;
-  border-radius: 6px !important;
+  height: 248px;
+  border-radius: 12px !important;
 }
 
 .metricCard :global(.demo-ant-card-body) {
@@ -60,7 +57,8 @@
 
 .metricValue {
   margin-top: 10px;
-  color: var(--rbd-heading-color, #495464);
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 22px;
   font-weight: 600;
   line-height: 30px;
@@ -89,36 +87,142 @@
   text-align: right;
 }
 
+.metricNumber {
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.metricDesc {
+  display: -webkit-box;
+  min-height: 36px;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .contentGrid {
   margin-top: 12px;
 }
 
 .sectionCard {
-  border-radius: 6px !important;
+  border-radius: 12px !important;
 }
 
-.routeText {
-  display: inline-block;
-  max-width: 360px;
+.rankingCard :global(.demo-ant-card-body) {
+  padding: 12px !important;
+}
+
+.rankingHeader {
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rankingListItem {
+  display: grid;
+  grid-template-columns: minmax(0, 2.8fr) minmax(180px, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fbff 0%, #fff 62%);
+}
+
+.rankingIdentity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rankingIndex {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid #b9cdfb;
+  border-radius: 10px;
+  background: #eef4ff;
+}
+
+.rankingName {
+  display: block;
+  min-width: 0;
   overflow: hidden;
-  color: var(--rbd-text-color, #495464);
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: middle;
 }
 
-.evidence {
-  margin-top: 12px;
+.rankingMetricList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(96px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+.rankingMetric {
+  min-width: 0;
+}
+
+.rankingMetricLabel {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--rbd-text-color-secondary, #676f83);
   font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankingMetricValue {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #111;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankingMetricDanger {
+  color: #dc2627;
 }
 
 :global {
-  .demo-ant-table-thead > tr > th {
-    background-color: var(--rbd-background-color, #f7f8fa) !important;
-    color: var(--rbd-text-color, #495464) !important;
-  }
-
   .demo-ant-card-head {
     min-height: 44px !important;
   }
@@ -134,6 +238,16 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .rankingListItem {
+    grid-template-columns: minmax(0, 2.4fr) minmax(160px, 1fr);
+  }
+
+  .rankingMetricList {
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
+  }
+}
+
 @media (max-width: 420px) {
   .metricMeta {
     flex-wrap: wrap;
@@ -141,5 +255,14 @@
 
   .metricMeta span:last-child {
     text-align: left;
+  }
+
+  .rankingListItem {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .rankingMetricList {
+    grid-template-columns: 1fr;
   }
 }

@@ -15,40 +15,13 @@ const METRIC_LABELS = {
 }
 
 const METRIC_COLORS = {
-  request_per_second: {
-    variable: '--rbd-processing-status',
-    fallback: '#1890ff',
-  },
-  egress_bytes_per_sec: {
-    variable: '--rbd-success-status',
-    fallback: '#00D777',
-  },
-  avg_latency_ms: {
-    variable: '--rbd-warning-status',
-    fallback: '#F69D4A',
-  },
-  error_rate: {
-    variable: '--rbd-error-status',
-    fallback: '#CD0200',
-  },
+  request_per_second: '#2E70EB',
+  egress_bytes_per_sec: '#17A34A',
+  avg_latency_ms: '#EBB30B',
+  error_rate: '#DC2627',
 }
 
-const getMetricColor = metric => {
-  const config = METRIC_COLORS[metric] || {
-    variable: '--rbd-down-status',
-    fallback: '#708090',
-  }
-  if (
-    typeof window === 'undefined' ||
-    typeof document === 'undefined' ||
-    !window.getComputedStyle ||
-    !document.documentElement
-  ) {
-    return config.fallback
-  }
-  const color = window.getComputedStyle(document.documentElement).getPropertyValue(config.variable).trim()
-  return color || config.fallback
-}
+const getMetricColor = metric => METRIC_COLORS[metric] || '#708090'
 
 const alphaColor = (color, alpha) => {
   const hex = color.trim()
@@ -139,7 +112,7 @@ const getYAxisBounds = data => {
 
 const getSeriesStyle = color => ({
   lineStyle: {
-    width: 2.4,
+    width: 1.8,
     color,
     cap: 'round',
     join: 'round',
@@ -341,7 +314,7 @@ class MetricTrend extends Component {
           connectNulls: true,
           animation: false,
           lineStyle: {
-            width: 2.4,
+            width: 1.8,
             color,
             cap: 'round',
             join: 'round',
