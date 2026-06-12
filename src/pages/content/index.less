@@ -2,31 +2,6 @@
   min-height: 80vh;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  background: #fff;
-  border: 1px solid var(--rbd-border-color-base, #e2e2e2);
-  border-radius: 12px;
-}
-
-.pageTitle {
-  color: #000;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 26px;
-}
-
-.pageDesc {
-  margin-top: 2px;
-  color: var(--rbd-text-color-secondary, #676f83);
-  font-size: 12px;
-}
-
 .toolbarControls {
   display: flex;
   flex-wrap: wrap;
@@ -35,8 +10,115 @@
   gap: 8px;
 }
 
+.gatewayToolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .notice {
   margin-bottom: 12px;
+}
+
+.platformTabs {
+}
+
+.tabBarStyle {
+  overflow: visible !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-nav-container),
+.tabBarStyle :global(.gpu-ant-tabs-nav-container) {
+  height: 38px !important;
+  overflow: visible !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-nav-wrap),
+.tabBarStyle :global(.gpu-ant-tabs-nav-wrap) {
+  border-bottom: 1px solid #e2e2e2 !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-tab),
+.tabBarStyle :global(.gpu-ant-tabs-tab) {
+  height: 38px !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  box-sizing: border-box;
+  border: 1px solid #e2e2e2 !important;
+  border-bottom: 0 !important;
+  border-left: none !important;
+  border-radius: 0 !important;
+  background-color: #fff !important;
+  font-size: 14px;
+  line-height: 12px;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-tab:first-child),
+.tabBarStyle :global(.gpu-ant-tabs-tab:first-child) {
+  border-left: 1px solid #e2e2e2 !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-ink-bar),
+.tabBarStyle :global(.gpu-ant-tabs-ink-bar) {
+  bottom: -1px !important;
+  height: 0 !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-nav),
+.tabBarStyle :global(.gpu-ant-tabs-bar) {
+  margin: 0 !important;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-content-holder),
+.tabBarStyle :global(.gateway-ant-tabs-top-content),
+.tabBarStyle :global(.gpu-ant-tabs-top-content) {
+  border-radius: 5px;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-content),
+.tabBarStyle :global(.gpu-ant-tabs-card-content) {
+  padding: 12px 0;
+  background-color: #fff;
+}
+
+.tabBarStyle :global(.gateway-ant-tabs-nav-list),
+.tabBarStyle :global(.gateway-ant-tabs-nav-operations),
+.tabBarStyle :global(.gateway-ant-tabs-nav-scroll),
+.tabBarStyle :global(.gateway-ant-tabs-nav-container-scrolling),
+.tabBarStyle :global(.gpu-ant-tabs-nav-scroll),
+.tabBarStyle :global(.gpu-ant-tabs-nav-container-scrolling) {
+  overflow: visible !important;
+}
+
+.platformTabs :global(.gateway-ant-tabs-nav) {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.platformTabs :global(.gateway-ant-tabs-extra-content) {
+  min-width: 0;
+}
+
+.monitorCenterCard {
+  margin-top: 12px;
+  min-height: calc(100vh - 220px);
+}
+
+.monitorCenterCard :global(.gateway-ant-card-body) {
+  padding: 12px !important;
+}
+
+.monitorCenterCard :global(.gateway-ant-tabs-nav) {
+  margin-bottom: 12px;
+}
+
+.monitorIframe {
+  width: 100%;
+  height: calc(100vh - 300px);
+  min-height: 640px;
+  border: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
 }
 
 .metricCard {
@@ -44,7 +126,7 @@
   border-radius: 12px !important;
 }
 
-.metricCard :global(.demo-ant-card-body) {
+.metricCard :global(.gateway-ant-card-body) {
   height: 100%;
   padding: 16px;
   box-sizing: border-box;
@@ -110,11 +192,53 @@
   margin-top: 12px;
 }
 
+.monitorOverview {
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.monitorOverviewCard {
+  height: 112px;
+  border-radius: 12px !important;
+}
+
+.monitorOverviewCard :global(.gateway-ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+  padding: 16px !important;
+  box-sizing: border-box;
+}
+
+.monitorOverviewValue {
+  overflow: hidden;
+  width: 100%;
+  margin-top: 10px;
+  color: #000;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monitorOverviewLabel {
+  overflow: hidden;
+  width: 100%;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sectionCard {
   border-radius: 12px !important;
 }
 
-.rankingCard :global(.demo-ant-card-body) {
+.rankingCard :global(.gateway-ant-card-body) {
   padding: 12px !important;
 }
 
@@ -245,7 +369,7 @@
   border-radius: 999px !important;
 }
 
-.nodeCard :global(.demo-ant-card-body) {
+.nodeCard :global(.gateway-ant-card-body) {
   padding: 12px !important;
 }
 
@@ -372,17 +496,17 @@
 }
 
 :global {
-  .demo-ant-card-head {
+  .gateway-ant-card-head {
     min-height: 44px !important;
   }
 
-  .demo-ant-card-head-title {
+  .gateway-ant-card-head-title {
     padding: 12px 0 !important;
     color: var(--rbd-heading-color, #495464);
     font-size: 14px;
   }
 
-  .demo-ant-card-body {
+  .gateway-ant-card-body {
     padding: 16px !important;
   }
 }
@@ -406,6 +530,22 @@
 }
 
 @media (max-width: 420px) {
+  .platformTabs :global(.gateway-ant-tabs-nav) {
+    align-items: flex-start;
+  }
+
+  .platformTabs :global(.gateway-ant-tabs-extra-content) {
+    width: 100%;
+  }
+
+  .toolbarControls {
+    justify-content: flex-start;
+  }
+
+  .gatewayToolbar {
+    justify-content: flex-start;
+  }
+
   .metricMeta {
     flex-wrap: wrap;
   }

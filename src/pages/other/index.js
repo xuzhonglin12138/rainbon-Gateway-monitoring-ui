@@ -404,7 +404,7 @@ export default class index extends Component {
     return this.renderRouteRankingCard({
       dataSource,
       emptyText: '暂无请求聚合数据',
-      title: '内部路由请求 Top10',
+      title: '内部路由请求',
       getItem: record => ({
         key: record.route_group,
         name: displayText(record.route_group, '-'),
@@ -420,7 +420,7 @@ export default class index extends Component {
     return this.renderRouteRankingCard({
       dataSource,
       emptyText: '暂无错误聚合数据',
-      title: '内部路由错误 Top10',
+      title: '内部路由错误',
       getItem: record => ({
         key: record.route_group,
         name: displayText(record.route_group, '-'),

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert, Button, Card, Col, Empty, Radio, Row, Select, Spin, Tooltip } from 'antd'
+import { Alert, Button, Card, Col, Empty, Radio, Row, Select, Spin, Tabs, Tooltip } from 'antd'
 import {
   getPlatformNodeSummary,
   getPlatformOverview,
@@ -36,10 +36,25 @@ import {
 } from '../../utils/networkMonitoring'
 import styles from './index.less'
 
+const MONITOR_PAGES = [
+  { key: 'cluster-overview', name: '集群概览', path: 'd/cluster-overview/ji-qun-jian-kong-gai-lan?orgId=1&refresh=1m' },
+  { key: 'ns-overview', name: '团队监控', path: 'd/ns-overview/ji-qun-namespacegai-lan?orgId=1&refresh=1m' },
+  { key: 'node-overview', name: '节点监控', path: 'd/node-overview/ji-qun-jie-dian-jian-kong-xiang-qing?orgId=1&refresh=1m' },
+  { key: 'node-resources-top', name: '节点性能', path: 'd/node-resources-top/ji-qun-jie-dian-xing-neng-topnjian-kong?orgId=1&refresh=1m' },
+  { key: 'pod', name: 'Pod监控', path: 'd/pod/podjian-kong?orgId=1&refresh=1m' },
+  { key: 'pod-top', name: 'Pod性能', path: 'd/pod-top/podxing-neng-topjian-kong?orgId=1&refresh=1m' },
+  { key: 'daemonset', name: '守护进程监控', path: 'd/daemonset/shou-hu-jin-cheng-ji-ying-yong-jian-kong?orgId=1&refresh=1m' },
+  { key: 'workload', name: '工作负载监控', path: 'd/workload/gong-zuo-fu-zai-jian-kong-gai-lan?orgId=1&refresh=1m' },
+  { key: 'deployment', name: '无状态应用监控', path: 'd/deployment/wu-zhuang-tai-ying-yong-jian-kong?orgId=1&refresh=1m' },
+  { key: 'statefulset', name: '有状态应用监控', path: 'd/statefulset/you-zhuang-tai-ying-yong-jian-kong?orgId=1&refresh=1m' },
+]
+
 export default class index extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      activeTab: 'gateway',
+      currentMonitorPage: MONITOR_PAGES[0].key,
       window: '5m',
       refreshInterval: DEFAULT_REFRESH_INTERVAL_MS,
       loading: false,
@@ -49,6 +64,8 @@ export default class index extends Component {
       topAppLatency: [],
       topTeamThroughput: [],
       nodes: [],
+      monitorOverviewData: {},
+      monitorPerformanceOverview: {},
       warnings: [],
       realtimeWarning: '',
     }
@@ -56,6 +73,7 @@ export default class index extends Component {
 
   componentDidMount() {
     setNetworkMonitoringBaseInfo(this.props?.baseInfo)
+    this.fetchMonitorCenterOverview()
     this.refreshPageData({ showLoading: true })
     this.startRefreshTimer()
   }
@@ -74,6 +92,69 @@ export default class index extends Component {
     this.setState({ refreshInterval }, () => {
       this.startRefreshTimer()
       this.refreshPageData()
+    })
+  }
+
+  handleTabChange = activeTab => {
+    this.setState({ activeTab })
+  }
+
+  handleMonitorPageChange = currentMonitorPage => {
+    this.setState({ currentMonitorPage })
+  }
+
+  fetchMonitorCenterOverview = () => {
+    const { dispatch } = this.props
+    if (typeof dispatch !== 'function') {
+      return
+    }
+    dispatch({
+      type: 'teamControl/fetchToken',
+      payload: {
+        team_name: 'default',
+        tokenNode: 'observability',
+      },
+      callback: res => {
+        if (res && res.status_code === 200) {
+          const token = res.bean?.access_key || false
+          if (token) {
+            this.fetchObservabilityOverview(token)
+            this.fetchPerformanceOverview(token)
+          }
+        }
+      },
+    })
+  }
+
+  fetchObservabilityOverview = token => {
+    const { dispatch } = this.props
+    if (typeof dispatch !== 'function') {
+      return
+    }
+    dispatch({
+      type: 'region/fetchObservabilityOverview',
+      payload: { token },
+      callback: res => {
+        this.setState({
+          monitorOverviewData: res?.response_data || {},
+        })
+      },
+    })
+  }
+
+  fetchPerformanceOverview = token => {
+    const { dispatch } = this.props
+    if (typeof dispatch !== 'function') {
+      return
+    }
+    dispatch({
+      type: 'region/fetchPerformanceOverview',
+      payload: { token },
+      callback: res => {
+        this.setState({
+          monitorPerformanceOverview: res?.response_data || {},
+        })
+      },
     })
   }
 
@@ -177,6 +258,49 @@ export default class index extends Component {
       return
     }
     window.location.hash = `/team/${encodeURIComponent(teamName)}/region/${encodeURIComponent(regionName)}/index`
+  }
+
+  getGrafanaProxyBase = () => {
+    const context = resolvePlatformContext(this.props)
+    const regionName = context.regionName || 'rainbond'
+    return `/console/regions/${encodeURIComponent(regionName)}/proxy/plugins/rainbond-gateway-monitoring/grafana/`
+  }
+
+  getGrafanaPageURL = page => `${this.getGrafanaProxyBase()}${page.path}`
+
+  handleGrafanaIframeLoad = e => {
+    const iframe = e?.target
+    if (!iframe) {
+      return
+    }
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document
+      const style = iframeDoc.createElement('style')
+      style.textContent = '.sidemenu { display: none !important; }'
+      iframeDoc.head.appendChild(style)
+    } catch (err) {
+      console.warn('无法访问 iframe 内容:', err)
+    }
+    iframe.style.opacity = '1'
+  }
+
+  renderGatewayControls() {
+    const { refreshInterval, window } = this.state
+    return (
+      <div className={styles.toolbarControls}>
+        <Radio.Group value={window} onChange={this.handleWindowChange} optionType="button" buttonStyle="solid">
+          {WINDOW_OPTIONS.map(item => (
+            <Radio.Button key={item.value} value={item.value}>{item.label}</Radio.Button>
+          ))}
+        </Radio.Group>
+        <Select
+          value={refreshInterval}
+          onChange={this.handleRefreshIntervalChange}
+          options={REFRESH_INTERVAL_OPTIONS}
+          style={{ width: 120 }}
+        />
+      </div>
+    )
   }
 
   renderMetricCards() {
@@ -366,14 +490,68 @@ export default class index extends Component {
     })
   }
 
-  renderNodeCards() {
+  renderMonitorOverviewCards() {
+    const { monitorOverviewData, monitorPerformanceOverview } = this.state
+    const cpuUseSum = monitorPerformanceOverview?.cpu_use_sum || 0
+    const memoryUseSum = Math.round(Number(monitorPerformanceOverview?.memory_use_sum || 0) / 1024)
+    const diskUseSum = parseInt(monitorPerformanceOverview?.disk_use_sum || 0, 10)
+    const items = [
+      {
+        label: 'CPU',
+        value: cpuUseSum || 0,
+        unit: 'Core',
+      },
+      {
+        label: '团队',
+        value: monitorOverviewData?.teams || 0,
+        unit: '个',
+      },
+      {
+        label: '内存',
+        value: memoryUseSum || 0,
+        unit: 'GB',
+      },
+      {
+        label: '应用',
+        value: monitorOverviewData?.apps || 0,
+        unit: '个',
+      },
+      {
+        label: '磁盘',
+        value: diskUseSum || 0,
+        unit: 'GB',
+      },
+      {
+        label: '实例',
+        value: monitorOverviewData?.instances || 0,
+        unit: '个',
+      },
+    ]
+
+    return (
+      <Row gutter={[12, 12]} className={styles.monitorOverview}>
+        {items.map(item => (
+          <Col xs={12} sm={8} lg={4} key={item.label}>
+            <Card className={styles.monitorOverviewCard}>
+              <div className={styles.monitorOverviewLabel}>{item.label}</div>
+              <div className={styles.monitorOverviewValue}>{item.value} {item.unit}</div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    )
+  }
+
+  renderNodeCards(options = {}) {
     const { nodes } = this.state
+    const title = options.title || '节点总览'
+    const description = options.description || '按节点维度展示平台流量、响应、错误和资源分配情况。'
     return (
       <Card className={`${styles.sectionCard} ${styles.nodeCard}`}>
         <div className={styles.nodeHeader}>
           <div>
-            <div className={styles.rankingTitle}>节点总览</div>
-            <div className={styles.rankingDesc}>按节点维度展示平台流量、响应、错误和资源分配情况。</div>
+            <div className={styles.rankingTitle}>{title}</div>
+            <div className={styles.rankingDesc}>{description}</div>
           </div>
         </div>
         <div className={styles.nodeList}>
@@ -424,32 +602,17 @@ export default class index extends Component {
     )
   }
 
-  render() {
-    const { loading, realtimeWarning, refreshInterval, topAppErrors, topAppLatency, topTeamThroughput, warnings, window } = this.state
+  renderGatewayTraffic() {
+    const { loading, realtimeWarning, topAppErrors, topAppLatency, topTeamThroughput, warnings } = this.state
     const notice = [...warnings]
     if (realtimeWarning) {
       notice.push(realtimeWarning)
     }
+
     return (
-      <div className={styles.container}>
-        <div className={styles.toolbar}>
-          <div>
-            <div className={styles.pageTitle}>网关监测</div>
-            <div className={styles.pageDesc}>聚焦整个平台入口流量、应用错误热点、应用延迟热点和团队吞吐热点</div>
-          </div>
-          <div className={styles.toolbarControls}>
-            <Radio.Group value={window} onChange={this.handleWindowChange} optionType="button" buttonStyle="solid">
-              {WINDOW_OPTIONS.map(item => (
-                <Radio.Button key={item.value} value={item.value}>{item.label}</Radio.Button>
-              ))}
-            </Radio.Group>
-            <Select
-              value={refreshInterval}
-              onChange={this.handleRefreshIntervalChange}
-              options={REFRESH_INTERVAL_OPTIONS}
-              style={{ width: 120 }}
-            />
-          </div>
+      <>
+        <div className={styles.gatewayToolbar}>
+          {this.renderGatewayControls()}
         </div>
 
         {notice.length > 0 && (
@@ -474,6 +637,58 @@ export default class index extends Component {
             </Col>
           </Row>
         </Spin>
+      </>
+    )
+  }
+
+  renderMonitorCenter() {
+    const { currentMonitorPage } = this.state
+    const currentPage = MONITOR_PAGES.find(page => page.key === currentMonitorPage) || MONITOR_PAGES[0]
+
+    return (
+      <>
+        {this.renderMonitorOverviewCards()}
+          <Tabs
+            activeKey={currentMonitorPage}
+            onChange={this.handleMonitorPageChange}
+            items={MONITOR_PAGES.map(page => ({
+              key: page.key,
+              label: page.name,
+            }))}
+          />
+          <iframe
+            id={`gateway-monitoring-grafana-${currentPage.key}`}
+            key={currentPage.key}
+            src={this.getGrafanaPageURL(currentPage)}
+            className={styles.monitorIframe}
+            title={currentPage.name}
+            onLoad={this.handleGrafanaIframeLoad}
+          />
+      </>
+    )
+  }
+
+  render() {
+    const { activeTab } = this.state
+    return (
+      <div className={styles.container}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={this.handleTabChange}
+          className={`${styles.platformTabs} ${styles.tabBarStyle}`}
+          items={[
+            {
+              key: 'gateway',
+              label: '网关监控',
+              children: this.renderGatewayTraffic(),
+            },
+            {
+              key: 'monitor',
+              label: '资源监控',
+              children: this.renderMonitorCenter(),
+            },
+          ]}
+        />
       </div>
     )
   }

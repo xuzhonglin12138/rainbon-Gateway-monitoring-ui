@@ -65,7 +65,7 @@ export default class index extends Component {
           }
         }}
         locale={antdLocale}
-        prefixCls='demo-ant'
+        prefixCls='gateway-ant'
       >
         {initDone && <ComponentPage {...this.props} />}
       </ConfigProvider>
