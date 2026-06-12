@@ -128,6 +128,25 @@ export async function getAppSLA(appID, params = {}) {
   })
 }
 
+export async function getAppSLAConfig(appID) {
+  return request(apiPath(`/apps/${appID}/sla/config`), {
+    method: 'get',
+  })
+}
+
+export async function saveAppSLAConfig(appID, data) {
+  return request(apiPath(`/apps/${appID}/sla/config`), {
+    method: 'put',
+    data,
+  })
+}
+
+export async function deleteAppSLAConfig(appID) {
+  return request(apiPath(`/apps/${appID}/sla/config`), {
+    method: 'delete',
+  })
+}
+
 export async function getAppRouteSummary(appID, params = {}) {
   return request(apiPath(`/apps/${appID}/internal-routes/summary${queryString(params)}`), {
     method: 'get',

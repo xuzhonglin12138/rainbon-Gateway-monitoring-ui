@@ -73,6 +73,20 @@
   line-height: 36px;
 }
 
+.slaTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slaSettingButton {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0 !important;
+  color: var(--rbd-text-color-secondary, #676f83);
+}
+
 .slaValueSuccess {
   color: #17a34a;
 }
@@ -89,8 +103,18 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 30px;
+  margin-top: 22px;
   text-align: left;
+}
+
+.slaMetaSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 10px;
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .slaMetaItem {
@@ -141,6 +165,23 @@
   line-height: 18px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.slaConfigForm {
+  display: grid;
+  gap: 8px;
+}
+
+.slaConfigLabel {
+  color: #111;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.slaConfigHint {
+  color: var(--rbd-text-color-secondary, #676f83);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .metricCard {

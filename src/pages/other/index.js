@@ -1,13 +1,17 @@
 import React, { Component } from 'react'
-import { Alert, Button, Card, Col, Empty, Radio, Row, Select, Spin, Tag, Tooltip } from 'antd'
+import { Alert, Button, Card, Col, Empty, Input, Modal, Radio, Row, Select, Spin, Tag, Tooltip, message } from 'antd'
+import { SettingOutlined } from '@ant-design/icons'
 import {
+  deleteAppSLAConfig,
   getConsoleAppServices,
   getAppComponentSummary,
   getAppOverview,
   getAppOverviewTrend,
   getAppSLA,
+  getAppSLAConfig,
   getAppTopErrors,
   getAppTopLatency,
+  saveAppSLAConfig,
   setNetworkMonitoringBaseInfo,
   syncAppHTTPLogger,
 } from '../../api'
@@ -32,6 +36,7 @@ import {
   getResponseList,
   getResponseTrendPoints,
   getResponseWarnings,
+  resolveRecordComponentID,
   resolveServiceAliases,
   displayText,
   resolveAppContext,
@@ -54,6 +59,9 @@ export default class index extends Component {
       componentDisplayMap: {},
       warnings: [],
       realtimeWarning: '',
+      slaConfigVisible: false,
+      slaConfigURL: '',
+      slaConfigSaving: false,
     }
   }
 
@@ -227,6 +235,13 @@ export default class index extends Component {
 
   getSLAStatus = value => {
     const rate = Number(value || 0)
+    if (rate <= 0) {
+      return {
+        className: styles.slaValueWarning,
+        tagColor: 'default',
+        tagText: '等待采样',
+      }
+    }
     if (rate < 0.6) {
       return {
         className: styles.slaValueError,
@@ -248,16 +263,95 @@ export default class index extends Component {
     }
   }
 
+  openSLAConfig = async () => {
+    const context = resolveAppContext(this.props)
+    if (!context.appID) {
+      message.warning('缺少当前应用 ID，无法配置 SLA')
+      return
+    }
+    this.setState({ slaConfigVisible: true })
+    try {
+      const response = await getAppSLAConfig(context.appID)
+      const config = getResponseData(response) || {}
+      this.setState({ slaConfigURL: config.url || '' })
+    } catch (error) {
+      this.setState({ slaConfigURL: this.state.sla?.url || '' })
+    }
+  }
+
+  closeSLAConfig = () => {
+    this.setState({ slaConfigVisible: false })
+  }
+
+  handleSLAURLChange = e => {
+    this.setState({ slaConfigURL: e.target.value })
+  }
+
+  saveSLAConfig = async () => {
+    const context = resolveAppContext(this.props)
+    const url = (this.state.slaConfigURL || '').trim()
+    if (!url) {
+      message.warning('请输入健康检查 URL')
+      return
+    }
+    this.setState({ slaConfigSaving: true })
+    try {
+      await saveAppSLAConfig(context.appID, { url })
+      message.success('SLA 健康检查已保存')
+      this.setState({ slaConfigVisible: false })
+      this.refreshPageData()
+    } catch (error) {
+      message.error('保存 SLA 健康检查失败')
+    } finally {
+      this.setState({ slaConfigSaving: false })
+    }
+  }
+
+  deleteSLAConfig = async () => {
+    const context = resolveAppContext(this.props)
+    this.setState({ slaConfigSaving: true })
+    try {
+      await deleteAppSLAConfig(context.appID)
+      message.success('SLA 健康检查已停用')
+      this.setState({ slaConfigVisible: false, slaConfigURL: '' })
+      this.refreshPageData()
+    } catch (error) {
+      message.error('停用 SLA 健康检查失败')
+    } finally {
+      this.setState({ slaConfigSaving: false })
+    }
+  }
+
   renderSLA() {
     const { sla } = this.state
-    const current = formatPercent(sla.current)
-    const target = formatPercent(sla.target)
-    const status = this.getSLAStatus(sla.current)
+    const configured = Boolean(sla.configured)
+    const hasSamples = Number(sla.total_checks || 0) > 0
+    const current = configured && hasSamples ? formatPercent(sla.current) : '--'
+    const target = formatPercent(sla.target || 0.99)
+    const status = configured && hasSamples ? this.getSLAStatus(sla.current) : {
+      className: styles.slaValueWarning,
+      tagColor: configured ? 'processing' : 'default',
+      tagText: configured ? '等待采样' : '未配置',
+    }
+    const lastStatus = sla.last_checked_at
+      ? `${sla.last_status_code || '失败'} · ${new Date(Number(sla.last_checked_at) * 1000).toLocaleString()}`
+      : '-'
     return (
       <Card className={styles.slaCard}>
         <div className={styles.slaHeader}>
           <div>
-            <div className={styles.metricTitle}>应用 SLA</div>
+            <div className={styles.slaTitleRow}>
+              <div className={styles.metricTitle}>应用 SLA</div>
+              <Tooltip title="配置健康检查 URL">
+                <Button
+                  className={styles.slaSettingButton}
+                  icon={<SettingOutlined />}
+                  size="small"
+                  type="text"
+                  onClick={this.openSLAConfig}
+                />
+              </Tooltip>
+            </div>
             <div className={`${styles.slaValue} ${status.className}`}>{current}</div>
           </div>
           <Tag color={status.tagColor}>{status.tagText}</Tag>
@@ -268,16 +362,59 @@ export default class index extends Component {
             <span className={`${styles.slaMetaValue} ${styles.slaMetaValueTarget}`}>{target}</span>
           </div>
           <div className={styles.slaMetaItem}>
-            <span className={styles.slaMetaKey}>总请求</span>
-            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueSuccess}`}>{formatNumber(sla.total_requests)}</span>
+            <span className={styles.slaMetaKey}>检查次数</span>
+            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueSuccess}`}>{formatNumber(sla.total_checks)}</span>
           </div>
           <div className={styles.slaMetaItem}>
-            <span className={styles.slaMetaKey}>错误请求</span>
-            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueError}`}>{formatNumber(sla.error_requests)}</span>
+            <span className={styles.slaMetaKey}>失败次数</span>
+            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueError}`}>{formatNumber(sla.failure_checks)}</span>
           </div>
         </div>
-        <div className={styles.slaDesc}>SLA 表示应用在当前时间窗口内满足可用性目标的服务水平。</div>
+        <div className={styles.slaMetaSecondary}>
+          <span>检查间隔 {sla.interval_seconds || 10}s</span>
+          <span>超时 {sla.timeout_seconds || 3}s</span>
+          <span>成功状态 {sla.success_status_range || '200-399'}</span>
+        </div>
+        <div className={styles.slaDesc}>
+          {configured
+            ? `最近状态：${lastStatus}${sla.last_error_type ? `，原因：${sla.last_error_type}` : ''}`
+            : '未配置健康检查 URL，无法计算应用 SLA。点击齿轮后只需填写 URL，系统会按 10 秒间隔自动检查。'}
+        </div>
       </Card>
+    )
+  }
+
+  renderSLAConfigModal() {
+    const { slaConfigSaving, slaConfigURL, slaConfigVisible, sla } = this.state
+    return (
+      <Modal
+        title="应用 SLA 健康检查"
+        open={slaConfigVisible}
+        onCancel={this.closeSLAConfig}
+        onOk={this.saveSLAConfig}
+        confirmLoading={slaConfigSaving}
+        okText="保存"
+        cancelText="取消"
+        footer={[
+          <Button key="delete" danger disabled={!sla.configured} loading={slaConfigSaving} onClick={this.deleteSLAConfig}>
+            停用
+          </Button>,
+          <Button key="cancel" onClick={this.closeSLAConfig}>取消</Button>,
+          <Button key="save" type="primary" loading={slaConfigSaving} onClick={this.saveSLAConfig}>保存</Button>,
+        ]}
+      >
+        <div className={styles.slaConfigForm}>
+          <label className={styles.slaConfigLabel}>健康检查 URL</label>
+          <Input
+            value={slaConfigURL}
+            placeholder="https://example.com/healthz"
+            onChange={this.handleSLAURLChange}
+          />
+          <div className={styles.slaConfigHint}>
+            系统固定每 10 秒检查一次，3 秒超时，HTTP 200-399 视为成功，SLA 目标为 99%，数据保留 30 天。
+          </div>
+        </div>
+      </Modal>
     )
   }
 
@@ -301,18 +438,18 @@ export default class index extends Component {
         description: '出口流量速率表示应用响应数据对外传输的网络速度。',
       },
       {
-        title: '整体错误率',
-        value: formatPercent(overview.error_rate),
-        metric: 'error_rate',
-        format: formatPercent,
-        description: '整体错误率表示应用失败请求在全部请求中的占比。',
-      },
-      {
         title: '平均延迟',
         value: formatLatency(overview.avg_latency_ms),
         metric: 'avg_latency_ms',
         format: formatLatency,
         description: '平均延迟表示应用处理请求并返回响应所花费的平均时间。',
+      },
+      {
+        title: '整体错误率',
+        value: formatPercent(overview.error_rate),
+        metric: 'error_rate',
+        format: formatPercent,
+        description: '整体错误率表示应用失败请求在全部请求中的占比。',
       },
     ]
     return cards.map(item => (
@@ -354,7 +491,7 @@ export default class index extends Component {
     window.location.hash = `/team/${teamName}/region/${regionName}/apps/${appID}/overview?type=components&componentID=${component}&tab=rainbond-gateway-monitoring`
   }
 
-  getRecordComponentID = record => displayText(record?.component_id, record?.service_alias)
+  getRecordComponentID = record => resolveRecordComponentID(record)
 
   renderRouteRankingCard({ dataSource, emptyText, getItem, title }) {
     const list = Array.isArray(dataSource) ? dataSource : []
@@ -504,7 +641,7 @@ export default class index extends Component {
       <div className={styles.container}>
         <div className={styles.toolbar}>
           <div>
-            <div className={styles.pageTitle}>应用流量</div>
+            <div className={styles.pageTitle}>流量分析</div>
             <div className={styles.pageDesc}>聚焦当前应用的入口流量、内部路由质量、组件错误和响应延迟情况</div>
           </div>
           <div className={styles.toolbarControls}>
@@ -550,6 +687,7 @@ export default class index extends Component {
             </Col>
           </Row>
         </Spin>
+        {this.renderSLAConfigModal()}
       </div>
     )
   }

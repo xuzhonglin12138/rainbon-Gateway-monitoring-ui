@@ -385,6 +385,24 @@ export const getComponentDisplayName = (record = {}, componentDisplayMap = {}) =
   return displayText(record.name, record.service_alias, record.component_id, '-')
 }
 
+export const isRainbondComponentID = value => /^gr[a-z0-9]/i.test(displayText(value))
+
+export const resolveRecordComponentID = (record = {}) => {
+  const candidates = [
+    record.component_id,
+    record.componentID,
+    record.service_id,
+    record.serviceID,
+  ]
+  for (let i = 0; i < candidates.length; i += 1) {
+    const value = displayText(candidates[i])
+    if (isRainbondComponentID(value)) {
+      return value
+    }
+  }
+  return ''
+}
+
 const firstNonEmpty = (...values) => {
   for (let i = 0; i < values.length; i += 1) {
     const value = values[i]

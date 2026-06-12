@@ -12,7 +12,7 @@ function loadNetworkMonitoring() {
   const filename = path.join(__dirname, 'networkMonitoring.js');
   let source = fs.readFileSync(filename, 'utf8');
   source = source.replace(/export const /g, 'const ');
-  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
+  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, resolveRecordComponentID, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
   const mod = new Module(filename, module);
   mod.filename = filename;
   mod.paths = Module._nodeModulePaths(__dirname);
@@ -33,6 +33,7 @@ const {
   buildWindowQueryParams,
   buildComponentDisplayMap,
   getComponentDisplayName,
+  resolveRecordComponentID,
   DEFAULT_REFRESH_INTERVAL_MS,
   REFRESH_INTERVAL_OPTIONS,
 } = loadNetworkMonitoring();
@@ -262,4 +263,11 @@ test('component display map resolves service alias to Chinese component name', f
   assert.equal(map.gr1ea4bc, '网关测试组件');
   assert.equal(map['svc-real-id'], '网关测试组件');
   assert.equal(getComponentDisplayName({ component_id: 'gr1ea4bc' }, map), '网关测试组件');
+});
+
+test('record component jump id only accepts real Rainbond component ids', function () {
+  assert.equal(resolveRecordComponentID({ component_id: 'gr1ea4bc', service_alias: 'rainbond' }), 'gr1ea4bc');
+  assert.equal(resolveRecordComponentID({ service_alias: 'rainbond' }), '');
+  assert.equal(resolveRecordComponentID({ component_id: 'rainbond' }), '');
+  assert.equal(resolveRecordComponentID({ service_id: 'gr707edd' }), 'gr707edd');
 });

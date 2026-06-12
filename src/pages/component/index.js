@@ -148,17 +148,10 @@ export default class index extends Component {
     const cards = [
       {
         title: '吞吐率',
-        value: formatThroughput(realtime.request_per_second),
+        value: formatThroughput(overview.throughput_per_second),
         metric: 'request_per_second',
         format: formatThroughput,
         description: '吞吐率表示组件单位时间内处理请求的能力。',
-      },
-      {
-        title: '整体错误率',
-        value: formatPercent(overview.error_rate),
-        metric: 'error_rate',
-        format: formatPercent,
-        description: '整体错误率表示组件失败请求在全部请求中的占比。',
       },
       {
         title: '平均延迟',
@@ -166,6 +159,13 @@ export default class index extends Component {
         metric: 'avg_latency_ms',
         format: formatLatency,
         description: '平均延迟表示组件处理请求并返回响应所花费的平均时间。',
+      },
+      {
+        title: '整体错误率',
+        value: formatPercent(overview.error_rate),
+        metric: 'error_rate',
+        format: formatPercent,
+        description: '整体错误率表示组件失败请求在全部请求中的占比。',
       },
     ]
     return (
@@ -296,7 +296,7 @@ export default class index extends Component {
           render: value => formatNumber(value),
         },
         {
-          title: '平均耗时',
+          title: '耗时',
           dataIndex: 'avg_latency_ms',
           fixed: 'right',
           width: 120,
