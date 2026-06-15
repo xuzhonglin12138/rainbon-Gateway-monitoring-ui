@@ -31,6 +31,7 @@ import {
   getResponseWarnings,
   getTeamThroughputItems,
   displayText,
+  resolveRecordAppID,
   resolvePlatformContext,
   resolveTeamPathFromRecord,
 } from '../../utils/networkMonitoring'
@@ -237,7 +238,7 @@ export default class index extends Component {
   }
 
   jumpToAppGateway = record => {
-    const appID = displayText(record?.app_id, record?.region_app_id)
+    const appID = resolveRecordAppID(record)
     if (!appID) {
       return
     }

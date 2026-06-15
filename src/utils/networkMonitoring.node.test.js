@@ -12,7 +12,7 @@ function loadNetworkMonitoring() {
   const filename = path.join(__dirname, 'networkMonitoring.js');
   let source = fs.readFileSync(filename, 'utf8');
   source = source.replace(/export const /g, 'const ');
-  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, resolveRecordComponentID, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
+  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, resolveRecordAppID, resolveRecordComponentID, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
   const mod = new Module(filename, module);
   mod.filename = filename;
   mod.paths = Module._nodeModulePaths(__dirname);
@@ -33,6 +33,7 @@ const {
   buildWindowQueryParams,
   buildComponentDisplayMap,
   getComponentDisplayName,
+  resolveRecordAppID,
   resolveRecordComponentID,
   DEFAULT_REFRESH_INTERVAL_MS,
   REFRESH_INTERVAL_OPTIONS,
@@ -270,4 +271,11 @@ test('record component jump id only accepts real Rainbond component ids', functi
   assert.equal(resolveRecordComponentID({ service_alias: 'rainbond' }), '');
   assert.equal(resolveRecordComponentID({ component_id: 'rainbond' }), '');
   assert.equal(resolveRecordComponentID({ service_id: 'gr707edd' }), 'gr707edd');
+});
+
+test('record app jump id only accepts numeric Rainbond app ids', function () {
+  assert.equal(resolveRecordAppID({ app_id: '1023', region_app_id: '65f629e7622d450594e3f2e35f6de412' }), '1023');
+  assert.equal(resolveRecordAppID({ app_id: '65f629e7622d450594e3f2e35f6de412' }), '');
+  assert.equal(resolveRecordAppID({ region_app_id: '65f629e7622d450594e3f2e35f6de412' }), '');
+  assert.equal(resolveRecordAppID({ group_id: 1136 }), '1136');
 });

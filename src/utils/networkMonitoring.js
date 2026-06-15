@@ -183,6 +183,24 @@ export const displayText = (...values) => {
   return value === undefined || value === null ? '' : String(value)
 }
 
+export const isRainbondAppID = value => /^\d+$/.test(displayText(value))
+
+export const resolveRecordAppID = (record = {}) => {
+  const candidates = [
+    record.app_id,
+    record.appID,
+    record.group_id,
+    record.groupID,
+  ]
+  for (let i = 0; i < candidates.length; i += 1) {
+    const value = displayText(candidates[i])
+    if (isRainbondAppID(value)) {
+      return value
+    }
+  }
+  return ''
+}
+
 const getUserTeams = props => props?.baseInfo?.currentUser?.teams || []
 
 export const resolveTeamPathFromRecord = (record = {}, props = {}) => {
