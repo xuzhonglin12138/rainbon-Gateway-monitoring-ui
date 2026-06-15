@@ -413,6 +413,32 @@ export default class index extends Component {
     )
   }
 
+  getAppDisplayName(record = {}) {
+    const name = displayText(record.name)
+    const appID = displayText(record.app_id)
+    return displayText(
+      record.app_name,
+      record.group_name,
+      name && name !== appID ? name : '',
+      appID,
+      record.region_app_id,
+      '-',
+    )
+  }
+
+  getTeamDisplayName(record = {}) {
+    return displayText(
+      record.team_alias,
+      record.tenant_alias,
+      record.team_display_name,
+      record.team_name,
+      record.tenant_name,
+      record.namespace,
+      record.team_id,
+      '-',
+    )
+  }
+
   renderErrorAppTable(dataSource) {
     return this.renderRankingCard({
       dataSource,
@@ -421,8 +447,12 @@ export default class index extends Component {
       title: '应用错误排行',
       getItem: (record, index) => ({
         key: `${record.app_id || 'app-error'}-${index}`,
-        name: displayText(record.app_name, record.name) || displayText(record.app_id, record.region_app_id, '-'),
+        name: this.getAppDisplayName(record),
         metrics: [
+          {
+            label: '所属团队',
+            value: this.getTeamDisplayName(record),
+          },
           {
             label: '错误率',
             value: formatPercent(record.error_rate),
@@ -449,8 +479,12 @@ export default class index extends Component {
       title: '应用延迟排行',
       getItem: (record, index) => ({
         key: `${record.app_id || 'app-latency'}-${index}`,
-        name: displayText(record.app_name, record.name) || displayText(record.app_id, record.region_app_id, '-'),
+        name: this.getAppDisplayName(record),
         metrics: [
+          {
+            label: '所属团队',
+            value: this.getTeamDisplayName(record),
+          },
           {
             label: '平均延时',
             value: formatLatency(record.avg_latency_ms),
@@ -627,14 +661,16 @@ export default class index extends Component {
             {this.renderNodeCards()}
           </div>
           <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={8}>
+            <Col xs={24}>
+              {this.renderTeamThroughputTable(topTeamThroughput)}
+            </Col>
+          </Row>
+          <Row gutter={[12, 12]} className={styles.contentGrid}>
+            <Col xs={24} lg={12}>
               {this.renderErrorAppTable(topAppErrors)}
             </Col>
-            <Col xs={24} lg={8}>
+            <Col xs={24} lg={12}>
               {this.renderLatencyAppTable(topAppLatency)}
-            </Col>
-            <Col xs={24} lg={8}>
-              {this.renderTeamThroughputTable(topTeamThroughput)}
             </Col>
           </Row>
         </Spin>
