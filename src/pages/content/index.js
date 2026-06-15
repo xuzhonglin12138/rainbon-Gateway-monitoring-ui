@@ -58,7 +58,7 @@ export default class index extends Component {
       currentMonitorPage: MONITOR_PAGES[0].key,
       window: '5m',
       refreshInterval: DEFAULT_REFRESH_INTERVAL_MS,
-      loading: false,
+      loading: {},
       overview: {},
       trendPoints: [],
       topAppErrors: [],
@@ -67,7 +67,7 @@ export default class index extends Component {
       nodes: [],
       monitorOverviewData: {},
       monitorPerformanceOverview: {},
-      warnings: [],
+      warnings: {},
       realtimeWarning: '',
     }
   }
@@ -167,55 +167,88 @@ export default class index extends Component {
   }
 
   refreshPageData = async (options = {}) => {
-    if (this.pageRefreshing) {
+    await Promise.allSettled([
+      this.fetchRealtimeData(),
+      this.fetchTopAppErrors(options),
+      this.fetchTopAppLatency(options),
+      this.fetchTopTeamThroughput(options),
+      this.fetchNodes(options),
+    ])
+  }
+
+  setSectionLoading = (key, value) => {
+    this.setState(prevState => ({
+      loading: {
+        ...prevState.loading,
+        [key]: value,
+      },
+    }))
+  }
+
+  setSectionWarnings = (key, warnings = []) => {
+    this.setState(prevState => ({
+      warnings: {
+        ...prevState.warnings,
+        [key]: warnings,
+      },
+    }))
+  }
+
+  runSectionRequest = async (key, options, request) => {
+    this.refreshingSections = this.refreshingSections || {}
+    if (this.refreshingSections[key]) {
       return
     }
-    this.pageRefreshing = true
+    this.refreshingSections[key] = true
+    if (options.showLoading) {
+      this.setSectionLoading(key, true)
+    }
     try {
-      await Promise.all([
-        this.fetchRealtimeData(),
-        this.fetchData(options),
-      ])
+      await request()
+    } catch (error) {
+      this.setSectionWarnings(key, ['平台级网络监控数据暂时不可用'])
     } finally {
-      this.pageRefreshing = false
+      if (options.showLoading) {
+        this.setSectionLoading(key, false)
+      }
+      this.refreshingSections[key] = false
     }
   }
 
-  fetchData = async (options = {}) => {
+  fetchTopAppErrors = async (options = {}) => {
     const { window } = this.state
-    if (options.showLoading) {
-      this.setState({ loading: true })
-    }
-    try {
-      const params = buildWindowQueryParams(window, { limit: 10 })
-      const throughputParams = buildWindowQueryParams(window, { limit: 200 })
-      const [topAppErrors, topAppLatency, topAppThroughput, nodes] = await Promise.all([
-        getPlatformAppTopErrors(params),
-        getPlatformAppTopLatency(params),
-        getPlatformAppTopThroughput(throughputParams),
-        getPlatformNodeSummary(buildWindowQueryParams(window)),
-      ])
-      this.setState({
-        topAppErrors: getResponseList(topAppErrors),
-        topAppLatency: getResponseList(topAppLatency),
-        topTeamThroughput: getTeamThroughputItems(getResponseList(topAppThroughput), 10),
-        nodes: getResponseList(nodes),
-        warnings: [
-          ...getResponseWarnings(topAppErrors),
-          ...getResponseWarnings(topAppLatency),
-          ...getResponseWarnings(topAppThroughput),
-          ...getResponseWarnings(nodes),
-        ],
-      })
-    } catch (error) {
-      this.setState({
-        warnings: ['平台级网络监控数据暂时不可用'],
-      })
-    } finally {
-      if (options.showLoading) {
-        this.setState({ loading: false })
-      }
-    }
+    await this.runSectionRequest('topAppErrors', options, async () => {
+      const response = await getPlatformAppTopErrors(buildWindowQueryParams(window, { limit: 10 }))
+      this.setState({ topAppErrors: getResponseList(response) })
+      this.setSectionWarnings('topAppErrors', getResponseWarnings(response))
+    })
+  }
+
+  fetchTopAppLatency = async (options = {}) => {
+    const { window } = this.state
+    await this.runSectionRequest('topAppLatency', options, async () => {
+      const response = await getPlatformAppTopLatency(buildWindowQueryParams(window, { limit: 10 }))
+      this.setState({ topAppLatency: getResponseList(response) })
+      this.setSectionWarnings('topAppLatency', getResponseWarnings(response))
+    })
+  }
+
+  fetchTopTeamThroughput = async (options = {}) => {
+    const { window } = this.state
+    await this.runSectionRequest('topTeamThroughput', options, async () => {
+      const response = await getPlatformAppTopThroughput(buildWindowQueryParams(window, { limit: 200 }))
+      this.setState({ topTeamThroughput: getTeamThroughputItems(getResponseList(response), 10) })
+      this.setSectionWarnings('topTeamThroughput', getResponseWarnings(response))
+    })
+  }
+
+  fetchNodes = async (options = {}) => {
+    const { window } = this.state
+    await this.runSectionRequest('nodes', options, async () => {
+      const response = await getPlatformNodeSummary(buildWindowQueryParams(window))
+      this.setState({ nodes: getResponseList(response) })
+      this.setSectionWarnings('nodes', getResponseWarnings(response))
+    })
   }
 
   fetchRealtimeData = async () => {
@@ -639,7 +672,7 @@ export default class index extends Component {
 
   renderGatewayTraffic() {
     const { loading, realtimeWarning, topAppErrors, topAppLatency, topTeamThroughput, warnings } = this.state
-    const notice = [...warnings]
+    const notice = Object.values(warnings || {}).reduce((items, current) => items.concat(current || []), [])
     if (realtimeWarning) {
       notice.push(realtimeWarning)
     }
@@ -656,24 +689,30 @@ export default class index extends Component {
 
         {this.renderMetricCards()}
 
-        <Spin spinning={loading}>
-          <div className={styles.contentGrid}>
+        <div className={styles.contentGrid}>
+          <Spin spinning={Boolean(loading.nodes)}>
             {this.renderNodeCards()}
-          </div>
-          <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24}>
+          </Spin>
+        </div>
+        <Row gutter={[12, 12]} className={styles.contentGrid}>
+          <Col xs={24}>
+            <Spin spinning={Boolean(loading.topTeamThroughput)}>
               {this.renderTeamThroughputTable(topTeamThroughput)}
-            </Col>
-          </Row>
-          <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={12}>
+            </Spin>
+          </Col>
+        </Row>
+        <Row gutter={[12, 12]} className={styles.contentGrid}>
+          <Col xs={24} lg={12}>
+            <Spin spinning={Boolean(loading.topAppErrors)}>
               {this.renderErrorAppTable(topAppErrors)}
-            </Col>
-            <Col xs={24} lg={12}>
+            </Spin>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Spin spinning={Boolean(loading.topAppLatency)}>
               {this.renderLatencyAppTable(topAppLatency)}
-            </Col>
-          </Row>
-        </Spin>
+            </Spin>
+          </Col>
+        </Row>
       </>
     )
   }

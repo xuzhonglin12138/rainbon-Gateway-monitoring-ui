@@ -49,7 +49,7 @@ export default class index extends Component {
     this.state = {
       window: '5m',
       refreshInterval: DEFAULT_REFRESH_INTERVAL_MS,
-      loading: false,
+      loading: {},
       overview: {},
       trendPoints: [],
       sla: {},
@@ -57,7 +57,7 @@ export default class index extends Component {
       topLatency: [],
       components: [],
       componentDisplayMap: {},
-      warnings: [],
+      warnings: {},
       realtimeWarning: '',
       slaConfigVisible: false,
       slaConfigURL: '',
@@ -97,21 +97,53 @@ export default class index extends Component {
   }
 
   refreshPageData = async (options = {}) => {
-    if (this.pageRefreshing) {
-      return
-    }
-    this.pageRefreshing = true
-    try {
-      await Promise.all([
-        this.fetchRealtimeData(),
-        this.fetchData(options),
-      ])
-    } finally {
-      this.pageRefreshing = false
-    }
+    await Promise.allSettled([
+      this.fetchRealtimeData(),
+      this.fetchSLA(options),
+      this.fetchTopErrors(options),
+      this.fetchTopLatency(options),
+      this.fetchComponents(options),
+    ])
   }
 
   safeRequest = promise => promise.then(response => ({ response })).catch(error => ({ error }))
+
+  setSectionLoading = (key, value) => {
+    this.setState(prevState => ({
+      loading: {
+        ...prevState.loading,
+        [key]: value,
+      },
+    }))
+  }
+
+  setSectionWarnings = (key, warnings = []) => {
+    this.setState(prevState => ({
+      warnings: {
+        ...prevState.warnings,
+        [key]: warnings,
+      },
+    }))
+  }
+
+  runSectionRequest = async (key, options, request) => {
+    this.refreshingSections = this.refreshingSections || {}
+    if (this.refreshingSections[key]) {
+      return
+    }
+    this.refreshingSections[key] = true
+    if (options.showLoading) {
+      this.setSectionLoading(key, true)
+    }
+    try {
+      await request()
+    } finally {
+      if (options.showLoading) {
+        this.setSectionLoading(key, false)
+      }
+      this.refreshingSections[key] = false
+    }
+  }
 
   loadAppServices = async () => {
     const context = resolveAppContext(this.props)
@@ -147,44 +179,61 @@ export default class index extends Component {
     }
   }
 
-  fetchData = async (options = {}) => {
+  fetchSLA = async (options = {}) => {
     const context = resolveAppContext(this.props)
     const { window } = this.state
     if (!context.appID) {
-      this.setState({ warnings: ['缺少当前应用 ID，无法查询应用级网络监控'] })
+      this.setSectionWarnings('app', ['缺少当前应用 ID，无法查询应用级网络监控'])
       return
     }
-    if (options.showLoading) {
-      this.setState({ loading: true })
-    }
-    try {
+    await this.runSectionRequest('sla', options, async () => {
       const params = buildWindowQueryParams(window, { limit: 10 })
-      const [sla, topErrors, topLatency, components] = await Promise.all([
-        this.safeRequest(getAppSLA(context.appID, params)),
-        this.safeRequest(getAppTopErrors(context.appID, params)),
-        this.safeRequest(getAppTopLatency(context.appID, params)),
-        this.safeRequest(getAppComponentSummary(context.appID, buildWindowQueryParams(window, { limit: 50 }))),
-      ])
-      const warnings = [
-        ...this.getResultWarnings(sla, '应用 SLA 暂时不可用'),
-        ...this.getResultWarnings(topErrors, '应用内部错误路由排序暂时不可用'),
-        ...this.getResultWarnings(topLatency, '应用内部慢路由排序暂时不可用'),
-        ...this.getResultWarnings(components, '应用组件汇总暂时不可用'),
-      ]
-      this.setState({
-        sla: this.getResultData(sla, {}),
-        topErrors: this.getResultList(topErrors),
-        topLatency: this.getResultList(topLatency),
-        components: this.getResultList(components),
-        warnings,
-      })
-    } catch (error) {
-      this.setState({ warnings: ['应用级网络监控数据暂时不可用'] })
-    } finally {
-      if (options.showLoading) {
-        this.setState({ loading: false })
-      }
+      const result = await this.safeRequest(getAppSLA(context.appID, params))
+      this.setState({ sla: this.getResultData(result, {}) })
+      this.setSectionWarnings('sla', this.getResultWarnings(result, '应用 SLA 暂时不可用'))
+    })
+  }
+
+  fetchTopErrors = async (options = {}) => {
+    const context = resolveAppContext(this.props)
+    const { window } = this.state
+    if (!context.appID) {
+      this.setSectionWarnings('app', ['缺少当前应用 ID，无法查询应用级网络监控'])
+      return
     }
+    await this.runSectionRequest('topErrors', options, async () => {
+      const result = await this.safeRequest(getAppTopErrors(context.appID, buildWindowQueryParams(window, { limit: 10 })))
+      this.setState({ topErrors: this.getResultList(result) })
+      this.setSectionWarnings('topErrors', this.getResultWarnings(result, '应用内部错误路由排序暂时不可用'))
+    })
+  }
+
+  fetchTopLatency = async (options = {}) => {
+    const context = resolveAppContext(this.props)
+    const { window } = this.state
+    if (!context.appID) {
+      this.setSectionWarnings('app', ['缺少当前应用 ID，无法查询应用级网络监控'])
+      return
+    }
+    await this.runSectionRequest('topLatency', options, async () => {
+      const result = await this.safeRequest(getAppTopLatency(context.appID, buildWindowQueryParams(window, { limit: 10 })))
+      this.setState({ topLatency: this.getResultList(result) })
+      this.setSectionWarnings('topLatency', this.getResultWarnings(result, '应用内部慢路由排序暂时不可用'))
+    })
+  }
+
+  fetchComponents = async (options = {}) => {
+    const context = resolveAppContext(this.props)
+    const { window } = this.state
+    if (!context.appID) {
+      this.setSectionWarnings('app', ['缺少当前应用 ID，无法查询应用级网络监控'])
+      return
+    }
+    await this.runSectionRequest('components', options, async () => {
+      const result = await this.safeRequest(getAppComponentSummary(context.appID, buildWindowQueryParams(window, { limit: 50 })))
+      this.setState({ components: this.getResultList(result) })
+      this.setSectionWarnings('components', this.getResultWarnings(result, '应用组件汇总暂时不可用'))
+    })
   }
 
   fetchRealtimeData = async () => {
@@ -633,7 +682,7 @@ export default class index extends Component {
 
   render() {
     const { loading, realtimeWarning, refreshInterval, topErrors, topLatency, warnings, window } = this.state
-    const notice = [...warnings]
+    const notice = Object.values(warnings || {}).reduce((items, current) => items.concat(current || []), [])
     if (realtimeWarning) {
       notice.push(realtimeWarning)
     }
@@ -665,28 +714,32 @@ export default class index extends Component {
 
         <Row gutter={[12, 12]}>
           <Col xs={24} lg={8}>
-            <Spin spinning={loading}>{this.renderSLA()}</Spin>
+            <Spin spinning={Boolean(loading.sla)}>{this.renderSLA()}</Spin>
           </Col>
           <Col xs={24} lg={16}>
             <Row gutter={[12, 12]}>{this.renderMetricCards()}</Row>
           </Col>
         </Row>
 
-        <Spin spinning={loading}>
-          <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24}>
+        <Row gutter={[12, 12]} className={styles.contentGrid}>
+          <Col xs={24}>
+            <Spin spinning={Boolean(loading.components)}>
               {this.renderComponentTable()}
-            </Col>
-          </Row>
-          <Row gutter={[12, 12]} className={styles.contentGrid}>
-            <Col xs={24} lg={12}>
+            </Spin>
+          </Col>
+        </Row>
+        <Row gutter={[12, 12]} className={styles.contentGrid}>
+          <Col xs={24} lg={12}>
+            <Spin spinning={Boolean(loading.topLatency)}>
               {this.renderLatencyRouteTable(topLatency)}
-            </Col>
-            <Col xs={24} lg={12}>
+            </Spin>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Spin spinning={Boolean(loading.topErrors)}>
               {this.renderErrorRouteTable(topErrors)}
-            </Col>
-          </Row>
-        </Spin>
+            </Spin>
+          </Col>
+        </Row>
         {this.renderSLAConfigModal()}
       </div>
     )
