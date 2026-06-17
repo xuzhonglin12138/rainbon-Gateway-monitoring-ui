@@ -75,33 +75,39 @@ export default class index extends Component {
   componentDidMount() {
     setNetworkMonitoringBaseInfo(this.props?.baseInfo)
     this.fetchMonitorCenterOverview()
-    this.refreshPageData({ showLoading: true })
-    this.startRefreshTimer()
+    this.bootstrapPage()
   }
 
   componentWillUnmount() {
-    if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
-    }
+    this.unmounted = true
+    this.clearRefreshTimer()
   }
 
   handleWindowChange = e => {
-    this.setState({ window: e.target.value }, () => this.refreshPageData({ showLoading: true }))
+    this.setState({ window: e.target.value }, () => this.refreshNow({ showLoading: true }))
   }
 
   handleRefreshIntervalChange = refreshInterval => {
-    this.setState({ refreshInterval }, () => {
-      this.startRefreshTimer()
-      this.refreshPageData()
-    })
+    this.setState({ refreshInterval }, () => this.refreshNow())
   }
 
   handleTabChange = activeTab => {
-    this.setState({ activeTab })
+    this.setState({ activeTab }, () => {
+      if (activeTab === 'gateway') {
+        this.refreshNow()
+        return
+      }
+      this.clearRefreshTimer()
+    })
   }
 
   handleMonitorPageChange = currentMonitorPage => {
     this.setState({ currentMonitorPage })
+  }
+
+  bootstrapPage = async () => {
+    await this.refreshPageData({ showLoading: true })
+    this.startRefreshTimer()
   }
 
   fetchMonitorCenterOverview = () => {
@@ -159,21 +165,53 @@ export default class index extends Component {
     })
   }
 
-  startRefreshTimer = () => {
+  clearRefreshTimer = () => {
     if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
+      clearTimeout(this.realtimeTimer)
+      this.realtimeTimer = null
     }
-    this.realtimeTimer = setInterval(this.refreshPageData, this.state.refreshInterval)
+  }
+
+  startRefreshTimer = () => {
+    this.clearRefreshTimer()
+    if (this.unmounted || this.state.activeTab !== 'gateway') {
+      return
+    }
+    this.realtimeTimer = setTimeout(this.handleScheduledRefresh, this.state.refreshInterval)
+  }
+
+  handleScheduledRefresh = async () => {
+    this.realtimeTimer = null
+    await this.refreshPageData()
+    this.startRefreshTimer()
+  }
+
+  refreshNow = async (options = {}) => {
+    this.clearRefreshTimer()
+    await this.refreshPageData(options)
+    this.startRefreshTimer()
   }
 
   refreshPageData = async (options = {}) => {
-    await Promise.allSettled([
-      this.fetchRealtimeData(),
-      this.fetchTopAppErrors(options),
-      this.fetchTopAppLatency(options),
-      this.fetchTopTeamThroughput(options),
-      this.fetchNodes(options),
-    ])
+    if (this.state.activeTab !== 'gateway' || this.pageRefreshing) {
+      return
+    }
+    this.pageRefreshing = true
+    const requestOptions = {
+      ...options,
+      queryNow: Date.now(),
+    }
+    try {
+      await Promise.allSettled([
+        this.fetchRealtimeData(requestOptions),
+        this.fetchTopAppErrors(requestOptions),
+        this.fetchTopAppLatency(requestOptions),
+        this.fetchTopTeamThroughput(requestOptions),
+        this.fetchNodes(requestOptions),
+      ])
+    } finally {
+      this.pageRefreshing = false
+    }
   }
 
   setSectionLoading = (key, value) => {
@@ -218,7 +256,7 @@ export default class index extends Component {
   fetchTopAppErrors = async (options = {}) => {
     const { window } = this.state
     await this.runSectionRequest('topAppErrors', options, async () => {
-      const response = await getPlatformAppTopErrors(buildWindowQueryParams(window, { limit: 10 }))
+      const response = await getPlatformAppTopErrors(buildWindowQueryParams(window, { limit: 5 }, options.queryNow))
       this.setState({ topAppErrors: getResponseList(response) })
       this.setSectionWarnings('topAppErrors', getResponseWarnings(response))
     })
@@ -227,7 +265,7 @@ export default class index extends Component {
   fetchTopAppLatency = async (options = {}) => {
     const { window } = this.state
     await this.runSectionRequest('topAppLatency', options, async () => {
-      const response = await getPlatformAppTopLatency(buildWindowQueryParams(window, { limit: 10 }))
+      const response = await getPlatformAppTopLatency(buildWindowQueryParams(window, { limit: 5 }, options.queryNow))
       this.setState({ topAppLatency: getResponseList(response) })
       this.setSectionWarnings('topAppLatency', getResponseWarnings(response))
     })
@@ -236,8 +274,8 @@ export default class index extends Component {
   fetchTopTeamThroughput = async (options = {}) => {
     const { window } = this.state
     await this.runSectionRequest('topTeamThroughput', options, async () => {
-      const response = await getPlatformAppTopThroughput(buildWindowQueryParams(window, { limit: 200 }))
-      this.setState({ topTeamThroughput: getTeamThroughputItems(getResponseList(response), 10) })
+      const response = await getPlatformAppTopThroughput(buildWindowQueryParams(window, { limit: 200 }, options.queryNow))
+      this.setState({ topTeamThroughput: getTeamThroughputItems(getResponseList(response), 5) })
       this.setSectionWarnings('topTeamThroughput', getResponseWarnings(response))
     })
   }
@@ -245,18 +283,18 @@ export default class index extends Component {
   fetchNodes = async (options = {}) => {
     const { window } = this.state
     await this.runSectionRequest('nodes', options, async () => {
-      const response = await getPlatformNodeSummary(buildWindowQueryParams(window))
+      const response = await getPlatformNodeSummary(buildWindowQueryParams(window, {}, options.queryNow))
       this.setState({ nodes: getResponseList(response) })
       this.setSectionWarnings('nodes', getResponseWarnings(response))
     })
   }
 
-  fetchRealtimeData = async () => {
+  fetchRealtimeData = async (options = {}) => {
     const { window } = this.state
     try {
       const [overview, trend] = await Promise.all([
-        getPlatformOverview(buildWindowQueryParams(window, { limit: 10 })),
-        getPlatformOverviewTrend(buildWindowQueryParams(window)),
+        getPlatformOverview(buildWindowQueryParams(window, { limit: 10 }, options.queryNow)),
+        getPlatformOverviewTrend(buildWindowQueryParams(window, {}, options.queryNow)),
       ])
       this.setState({
         overview: getResponseData(overview),

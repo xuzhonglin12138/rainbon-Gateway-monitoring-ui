@@ -47,32 +47,52 @@ export default class index extends Component {
 
   componentDidMount() {
     setNetworkMonitoringBaseInfo(this.props?.baseInfo)
-    this.refreshPageData({ showLoading: true })
-    this.startRefreshTimer()
+    this.bootstrapPage()
   }
 
   componentWillUnmount() {
-    if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
-    }
+    this.unmounted = true
+    this.clearRefreshTimer()
   }
 
   handleWindowChange = e => {
-    this.setState({ window: e.target.value }, () => this.refreshPageData({ showLoading: true }))
+    this.setState({ window: e.target.value }, () => this.refreshNow({ showLoading: true }))
   }
 
   handleRefreshIntervalChange = refreshInterval => {
-    this.setState({ refreshInterval }, () => {
-      this.startRefreshTimer()
-      this.refreshPageData()
-    })
+    this.setState({ refreshInterval }, () => this.refreshNow())
+  }
+
+  bootstrapPage = async () => {
+    await this.refreshPageData({ showLoading: true })
+    this.startRefreshTimer()
+  }
+
+  clearRefreshTimer = () => {
+    if (this.realtimeTimer) {
+      clearTimeout(this.realtimeTimer)
+      this.realtimeTimer = null
+    }
   }
 
   startRefreshTimer = () => {
-    if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
+    this.clearRefreshTimer()
+    if (this.unmounted) {
+      return
     }
-    this.realtimeTimer = setInterval(this.refreshPageData, this.state.refreshInterval)
+    this.realtimeTimer = setTimeout(this.handleScheduledRefresh, this.state.refreshInterval)
+  }
+
+  handleScheduledRefresh = async () => {
+    this.realtimeTimer = null
+    await this.refreshPageData()
+    this.startRefreshTimer()
+  }
+
+  refreshNow = async (options = {}) => {
+    this.clearRefreshTimer()
+    await this.refreshPageData(options)
+    this.startRefreshTimer()
   }
 
   refreshPageData = async (options = {}) => {
@@ -80,10 +100,14 @@ export default class index extends Component {
       return
     }
     this.pageRefreshing = true
+    const requestOptions = {
+      ...options,
+      queryNow: Date.now(),
+    }
     try {
       await Promise.all([
-        this.fetchRealtimeData(),
-        this.fetchData(options),
+        this.fetchRealtimeData(requestOptions),
+        this.fetchData(requestOptions),
       ])
     } finally {
       this.pageRefreshing = false
@@ -101,7 +125,7 @@ export default class index extends Component {
       this.setState({ loading: true })
     }
     try {
-      const params = buildWindowQueryParams(window, { limit: 50 })
+      const params = buildWindowQueryParams(window, { limit: 50 }, options.queryNow)
       const [routes] = await Promise.all([
         getComponentInternalRoutes(context.componentID, params),
       ])
@@ -120,7 +144,7 @@ export default class index extends Component {
     }
   }
 
-  fetchRealtimeData = async () => {
+  fetchRealtimeData = async (options = {}) => {
     const context = resolveComponentContext(this.props)
     if (!context.componentID) {
       return
@@ -128,8 +152,8 @@ export default class index extends Component {
     const { window } = this.state
     try {
       const [overview, trend] = await Promise.all([
-        getComponentOverview(context.componentID, buildWindowQueryParams(window, { limit: 50 })),
-        getComponentOverviewTrend(context.componentID, buildWindowQueryParams(window)),
+        getComponentOverview(context.componentID, buildWindowQueryParams(window, { limit: 50 }, options.queryNow)),
+        getComponentOverviewTrend(context.componentID, buildWindowQueryParams(window, {}, options.queryNow)),
       ])
       this.setState({
         overview: getResponseData(overview),
@@ -308,8 +332,8 @@ export default class index extends Component {
 
   render() {
     const { loading, realtimeWarning, refreshInterval, routes, warnings, window } = this.state
-    const errorRoutes = sortByErrors(routes).slice(0, 10)
-    const latencyRoutes = sortByLatency(routes).slice(0, 10)
+    const errorRoutes = sortByErrors(routes).slice(0, 5)
+    const latencyRoutes = sortByLatency(routes).slice(0, 5)
     const notice = [...warnings]
     if (realtimeWarning) {
       notice.push(realtimeWarning)

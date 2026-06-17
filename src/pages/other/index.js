@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Alert, Button, Card, Col, Empty, Input, Modal, Radio, Row, Select, Spin, Tag, Tooltip, message } from 'antd'
+import { Alert, Button, Card, Col, Empty, Modal, Radio, Row, Select, Spin, Tag, Tooltip, message } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import {
   deleteAppSLAConfig,
@@ -36,6 +36,7 @@ import {
   getResponseList,
   getResponseTrendPoints,
   getResponseWarnings,
+  normalizeSLAGatewayDomains,
   resolveRecordComponentID,
   resolveServiceAliases,
   displayText,
@@ -60,50 +61,87 @@ export default class index extends Component {
       warnings: {},
       realtimeWarning: '',
       slaConfigVisible: false,
-      slaConfigURL: '',
       slaConfigSaving: false,
+      slaDomains: [],
+      slaDomainLoading: false,
+      slaDomainSelectionRequired: false,
+      slaDomainWarning: '',
+      slaSelectedDomain: '',
+      slaSelectedScheme: 'http',
     }
   }
 
   componentDidMount() {
     setNetworkMonitoringBaseInfo(this.props?.baseInfo)
-    this.loadAppServices()
-    this.refreshPageData({ showLoading: true })
-    this.startRefreshTimer()
+    this.bootstrapPage()
   }
 
   componentWillUnmount() {
-    if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
-    }
+    this.unmounted = true
+    this.clearRefreshTimer()
   }
 
   handleWindowChange = e => {
-    this.setState({ window: e.target.value }, () => this.refreshPageData({ showLoading: true }))
+    this.setState({ window: e.target.value }, () => this.refreshNow({ showLoading: true }))
   }
 
   handleRefreshIntervalChange = refreshInterval => {
-    this.setState({ refreshInterval }, () => {
-      this.startRefreshTimer()
-      this.refreshPageData()
-    })
+    this.setState({ refreshInterval }, () => this.refreshNow())
+  }
+
+  bootstrapPage = async () => {
+    this.loadAppServices()
+    await this.refreshPageData({ showLoading: true })
+    this.startRefreshTimer()
+  }
+
+  clearRefreshTimer = () => {
+    if (this.realtimeTimer) {
+      clearTimeout(this.realtimeTimer)
+      this.realtimeTimer = null
+    }
   }
 
   startRefreshTimer = () => {
-    if (this.realtimeTimer) {
-      clearInterval(this.realtimeTimer)
+    this.clearRefreshTimer()
+    if (this.unmounted) {
+      return
     }
-    this.realtimeTimer = setInterval(this.refreshPageData, this.state.refreshInterval)
+    this.realtimeTimer = setTimeout(this.handleScheduledRefresh, this.state.refreshInterval)
+  }
+
+  handleScheduledRefresh = async () => {
+    this.realtimeTimer = null
+    await this.refreshPageData()
+    this.startRefreshTimer()
+  }
+
+  refreshNow = async (options = {}) => {
+    this.clearRefreshTimer()
+    await this.refreshPageData(options)
+    this.startRefreshTimer()
   }
 
   refreshPageData = async (options = {}) => {
-    await Promise.allSettled([
-      this.fetchRealtimeData(),
-      this.fetchSLA(options),
-      this.fetchTopErrors(options),
-      this.fetchTopLatency(options),
-      this.fetchComponents(options),
-    ])
+    if (this.pageRefreshing) {
+      return
+    }
+    this.pageRefreshing = true
+    const requestOptions = {
+      ...options,
+      queryNow: Date.now(),
+    }
+    try {
+      await Promise.allSettled([
+        this.fetchRealtimeData(requestOptions),
+        this.fetchSLA(requestOptions),
+        this.fetchTopErrors(requestOptions),
+        this.fetchTopLatency(requestOptions),
+        this.fetchComponents(requestOptions),
+      ])
+    } finally {
+      this.pageRefreshing = false
+    }
   }
 
   safeRequest = promise => promise.then(response => ({ response })).catch(error => ({ error }))
@@ -187,7 +225,7 @@ export default class index extends Component {
       return
     }
     await this.runSectionRequest('sla', options, async () => {
-      const params = buildWindowQueryParams(window, { limit: 10 })
+      const params = buildWindowQueryParams(window, { limit: 10 }, options.queryNow)
       const result = await this.safeRequest(getAppSLA(context.appID, params))
       this.setState({ sla: this.getResultData(result, {}) })
       this.setSectionWarnings('sla', this.getResultWarnings(result, '应用 SLA 暂时不可用'))
@@ -202,7 +240,7 @@ export default class index extends Component {
       return
     }
     await this.runSectionRequest('topErrors', options, async () => {
-      const result = await this.safeRequest(getAppTopErrors(context.appID, buildWindowQueryParams(window, { limit: 10 })))
+      const result = await this.safeRequest(getAppTopErrors(context.appID, buildWindowQueryParams(window, { limit: 5 }, options.queryNow)))
       this.setState({ topErrors: this.getResultList(result) })
       this.setSectionWarnings('topErrors', this.getResultWarnings(result, '应用内部错误路由排序暂时不可用'))
     })
@@ -216,7 +254,7 @@ export default class index extends Component {
       return
     }
     await this.runSectionRequest('topLatency', options, async () => {
-      const result = await this.safeRequest(getAppTopLatency(context.appID, buildWindowQueryParams(window, { limit: 10 })))
+      const result = await this.safeRequest(getAppTopLatency(context.appID, buildWindowQueryParams(window, { limit: 5 }, options.queryNow)))
       this.setState({ topLatency: this.getResultList(result) })
       this.setSectionWarnings('topLatency', this.getResultWarnings(result, '应用内部慢路由排序暂时不可用'))
     })
@@ -230,13 +268,13 @@ export default class index extends Component {
       return
     }
     await this.runSectionRequest('components', options, async () => {
-      const result = await this.safeRequest(getAppComponentSummary(context.appID, buildWindowQueryParams(window, { limit: 50 })))
+      const result = await this.safeRequest(getAppComponentSummary(context.appID, buildWindowQueryParams(window, { limit: 50 }, options.queryNow)))
       this.setState({ components: this.getResultList(result) })
       this.setSectionWarnings('components', this.getResultWarnings(result, '应用组件汇总暂时不可用'))
     })
   }
 
-  fetchRealtimeData = async () => {
+  fetchRealtimeData = async (options = {}) => {
     const context = resolveAppContext(this.props)
     if (!context.appID) {
       return
@@ -244,8 +282,8 @@ export default class index extends Component {
     const { window } = this.state
     try {
       const [overview, trend] = await Promise.all([
-        this.safeRequest(getAppOverview(context.appID, buildWindowQueryParams(window, { limit: 10 }))),
-        this.safeRequest(getAppOverviewTrend(context.appID, buildWindowQueryParams(window))),
+        this.safeRequest(getAppOverview(context.appID, buildWindowQueryParams(window, { limit: 10 }, options.queryNow))),
+        this.safeRequest(getAppOverviewTrend(context.appID, buildWindowQueryParams(window, {}, options.queryNow))),
       ])
       const realtimeWarnings = [
         ...this.getResultWarnings(overview, '应用级基础网络指标暂时不可用'),
@@ -318,39 +356,101 @@ export default class index extends Component {
       message.warning('缺少当前应用 ID，无法配置 SLA')
       return
     }
-    this.setState({ slaConfigVisible: true })
+    this.setState({
+      slaConfigVisible: true,
+      slaDomainLoading: true,
+      slaDomainWarning: '',
+      slaSelectedDomain: '',
+      slaSelectedScheme: 'http',
+    })
+    let config = {}
     try {
       const response = await getAppSLAConfig(context.appID)
-      const config = getResponseData(response) || {}
-      this.setState({ slaConfigURL: config.url || '' })
+      config = getResponseData(response) || {}
     } catch (error) {
-      this.setState({ slaConfigURL: this.state.sla?.url || '' })
+      config = this.state.sla || {}
     }
+    this.loadSLAGatewayDomains(config)
   }
 
   closeSLAConfig = () => {
     this.setState({ slaConfigVisible: false })
   }
 
-  handleSLAURLChange = e => {
-    this.setState({ slaConfigURL: e.target.value })
+  loadSLAGatewayDomains = config => {
+    const context = resolveAppContext(this.props)
+    const dispatch = this.props?.dispatch
+    if (!context.teamName || !context.appID || typeof dispatch !== 'function') {
+      this.setState({
+        slaDomains: [],
+        slaDomainLoading: false,
+        slaDomainSelectionRequired: false,
+        slaDomainWarning: '无法获取应用网关域名，请确认当前页面已加载团队和应用上下文。',
+      })
+      return
+    }
+    dispatch({
+      type: 'gateWay/getApiGatewayList',
+      payload: {
+        teamName: context.teamName,
+        appID: context.appID,
+        type: 'http',
+        query: '',
+      },
+      callback: res => {
+        const normalized = normalizeSLAGatewayDomains(res?.list || getConsoleResponseList(res))
+        const configuredDomain = displayText(config?.domain, this.state.sla?.domain)
+        const configuredScheme = displayText(config?.scheme, this.state.sla?.scheme, 'http').toLowerCase()
+        const selected = normalized.items.find(item => item.domain === configuredDomain && item.scheme === configuredScheme) ||
+          normalized.items.find(item => item.domain === configuredDomain) ||
+          (normalized.items.length === 1 ? normalized.items[0] : null)
+        this.setState({
+          slaDomains: normalized.items,
+          slaDomainLoading: false,
+          slaDomainSelectionRequired: normalized.selection_required,
+          slaDomainWarning: normalized.items.length ? '' : '当前应用没有可用于 SLA 的 HTTP 网关域名。',
+          slaSelectedDomain: selected?.domain || '',
+          slaSelectedScheme: selected?.scheme || configuredScheme || 'http',
+        })
+      },
+      handleError: () => {
+        this.setState({
+          slaDomains: [],
+          slaDomainLoading: false,
+          slaDomainSelectionRequired: false,
+          slaDomainWarning: '获取应用网关域名失败，请稍后重试。',
+        })
+      },
+    })
+  }
+
+  handleSLADomainChange = value => {
+    const item = this.state.slaDomains.find(domain => `${domain.scheme}://${domain.domain}` === value)
+    this.setState({
+      slaSelectedDomain: item?.domain || '',
+      slaSelectedScheme: item?.scheme || 'http',
+    })
   }
 
   saveSLAConfig = async () => {
     const context = resolveAppContext(this.props)
-    const url = (this.state.slaConfigURL || '').trim()
-    if (!url) {
-      message.warning('请输入健康检查 URL')
+    const domain = this.state.slaSelectedDomain
+    const selected = this.state.slaDomains.find(item => item.domain === domain && item.scheme === this.state.slaSelectedScheme)
+    if (!selected) {
+      message.warning('请选择 SLA 主域名')
       return
     }
     this.setState({ slaConfigSaving: true })
     try {
-      await saveAppSLAConfig(context.appID, { url })
-      message.success('SLA 健康检查已保存')
+      await saveAppSLAConfig(context.appID, {
+        domain: selected.domain,
+        scheme: selected.scheme,
+      })
+      message.success('SLA 主域名已保存')
       this.setState({ slaConfigVisible: false })
-      this.refreshPageData()
+      this.refreshNow()
     } catch (error) {
-      message.error('保存 SLA 健康检查失败')
+      message.error('保存 SLA 主域名失败')
     } finally {
       this.setState({ slaConfigSaving: false })
     }
@@ -362,8 +462,12 @@ export default class index extends Component {
     try {
       await deleteAppSLAConfig(context.appID)
       message.success('SLA 健康检查已停用')
-      this.setState({ slaConfigVisible: false, slaConfigURL: '' })
-      this.refreshPageData()
+      this.setState({
+        slaConfigVisible: false,
+        slaSelectedDomain: '',
+        slaSelectedScheme: 'http',
+      })
+      this.refreshNow()
     } catch (error) {
       message.error('停用 SLA 健康检查失败')
     } finally {
@@ -375,23 +479,26 @@ export default class index extends Component {
     const { sla } = this.state
     const configured = Boolean(sla.configured)
     const hasSamples = Number(sla.total_checks || 0) > 0
-    const current = configured && hasSamples ? formatPercent(sla.current) : '--'
+    const availableRatio = Number(sla.available_ratio ?? sla.current ?? 0)
+    const unavailableRatio = Number(sla.unavailable_ratio ?? (hasSamples ? 1 - availableRatio : 0))
+    const current = configured && hasSamples ? formatPercent(availableRatio) : '--'
     const target = formatPercent(sla.target || 0.99)
-    const status = configured && hasSamples ? this.getSLAStatus(sla.current) : {
+    const status = configured && hasSamples ? this.getSLAStatus(availableRatio) : {
       className: styles.slaValueWarning,
       tagColor: configured ? 'processing' : 'default',
       tagText: configured ? '等待采样' : '未配置',
     }
-    const lastStatus = sla.last_checked_at
-      ? `${sla.last_status_code || '失败'} · ${new Date(Number(sla.last_checked_at) * 1000).toLocaleString()}`
-      : '-'
+    const lastUnavailable = sla.last_unavailable_at
+      ? new Date(Number(sla.last_unavailable_at) * 1000).toLocaleString()
+      : '暂无不可用记录'
+    const domainText = displayText(sla.domain, sla.url, '-')
     return (
       <Card className={styles.slaCard}>
         <div className={styles.slaHeader}>
           <div>
             <div className={styles.slaTitleRow}>
               <div className={styles.metricTitle}>应用 SLA</div>
-              <Tooltip title="配置健康检查 URL">
+              <Tooltip title="配置 SLA 主域名">
                 <Button
                   className={styles.slaSettingButton}
                   icon={<SettingOutlined />}
@@ -407,37 +514,46 @@ export default class index extends Component {
         </div>
         <div className={styles.slaMeta}>
           <div className={styles.slaMetaItem}>
+            <span className={styles.slaMetaKey}>可用时间占比</span>
+            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueSuccess}`}>{configured && hasSamples ? formatPercent(availableRatio) : '--'}</span>
+          </div>
+          <div className={styles.slaMetaItem}>
+            <span className={styles.slaMetaKey}>不可用时间占比</span>
+            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueError}`}>{configured && hasSamples ? formatPercent(unavailableRatio) : '--'}</span>
+          </div>
+          <div className={styles.slaMetaItem}>
             <span className={styles.slaMetaKey}>目标</span>
             <span className={`${styles.slaMetaValue} ${styles.slaMetaValueTarget}`}>{target}</span>
           </div>
-          <div className={styles.slaMetaItem}>
-            <span className={styles.slaMetaKey}>检查次数</span>
-            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueSuccess}`}>{formatNumber(sla.total_checks)}</span>
-          </div>
-          <div className={styles.slaMetaItem}>
-            <span className={styles.slaMetaKey}>失败次数</span>
-            <span className={`${styles.slaMetaValue} ${styles.slaMetaValueError}`}>{formatNumber(sla.failure_checks)}</span>
-          </div>
         </div>
         <div className={styles.slaMetaSecondary}>
-          <span>检查间隔 {sla.interval_seconds || 10}s</span>
-          <span>超时 {sla.timeout_seconds || 3}s</span>
-          <span>成功状态 {sla.success_status_range || '200-399'}</span>
+          <span>监测域名 {domainText}</span>
         </div>
         <div className={styles.slaDesc}>
           {configured
-            ? `最近状态：${lastStatus}${sla.last_error_type ? `，原因：${sla.last_error_type}` : ''}`
-            : '未配置健康检查 URL，无法计算应用 SLA。点击齿轮后只需填写 URL，系统会按 10 秒间隔自动检查。'}
+            ? `最近不可用时间：${lastUnavailable}。`
+            : '未配置 SLA 主域名，无法计算应用 SLA。点击齿轮后从应用 HTTP 网关域名中选择主域名即可。'}
         </div>
       </Card>
     )
   }
 
   renderSLAConfigModal() {
-    const { slaConfigSaving, slaConfigURL, slaConfigVisible, sla } = this.state
+    const {
+      slaConfigSaving,
+      slaConfigVisible,
+      sla,
+      slaDomains,
+      slaDomainLoading,
+      slaDomainSelectionRequired,
+      slaDomainWarning,
+      slaSelectedDomain,
+      slaSelectedScheme,
+    } = this.state
+    const selectedValue = slaSelectedDomain ? `${slaSelectedScheme}://${slaSelectedDomain}` : undefined
     return (
       <Modal
-        title="应用 SLA 健康检查"
+        title="应用 SLA 主域名"
         open={slaConfigVisible}
         onCancel={this.closeSLAConfig}
         onOk={this.saveSLAConfig}
@@ -453,12 +569,33 @@ export default class index extends Component {
         ]}
       >
         <div className={styles.slaConfigForm}>
-          <label className={styles.slaConfigLabel}>健康检查 URL</label>
-          <Input
-            value={slaConfigURL}
-            placeholder="https://example.com/healthz"
-            onChange={this.handleSLAURLChange}
-          />
+          <label className={styles.slaConfigLabel}>主域名</label>
+          <Select
+            value={selectedValue}
+            placeholder="请选择主域名"
+            loading={slaDomainLoading}
+            disabled={!slaDomains.length}
+            onChange={this.handleSLADomainChange}
+            optionLabelProp="label"
+          >
+            {slaDomains.map(item => (
+              <Select.Option key={`${item.scheme}://${item.domain}`} value={`${item.scheme}://${item.domain}`} label={item.domain}>
+                <div className={styles.slaDomainOption}>
+                  <span className={styles.slaDomainName}>{item.domain}</span>
+                  <span className={styles.slaDomainMeta}>{item.scheme.toUpperCase()}{item.component_name ? ` · ${item.component_name}` : ''}</span>
+                </div>
+              </Select.Option>
+            ))}
+          </Select>
+          {slaDomainWarning ? (
+            <Alert type="warning" showIcon message={slaDomainWarning} />
+          ) : (
+            <Alert
+              type="info"
+              showIcon
+              message={slaDomainSelectionRequired ? '检测到多个应用 HTTP 网关域名，请选择一个作为 SLA 主域名。' : '检测到单个应用 HTTP 网关域名，系统已自动选中。'}
+            />
+          )}
           <div className={styles.slaConfigHint}>
             系统固定每 10 秒检查一次，3 秒超时，HTTP 200-399 视为成功，SLA 目标为 99%，数据保留 30 天。
           </div>

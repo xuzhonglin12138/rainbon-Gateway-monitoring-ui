@@ -139,10 +139,10 @@ export const formatThroughput = value => `${formatNumber(value)}/s`
 export const formatBytes = value => {
   const num = Number(value || 0)
   if (num >= 1024 * 1024) {
-    return `${(num / 1024 / 1024).toFixed(2)} MiB/s`
+    return `${(num / 1024 / 1024).toFixed(2)} MB/s`
   }
   if (num >= 1024) {
-    return `${(num / 1024).toFixed(2)} KiB/s`
+    return `${(num / 1024).toFixed(2)} KB/s`
   }
 	return `${num.toFixed(2)} B/s`
 }
@@ -150,10 +150,10 @@ export const formatBytes = value => {
 export const formatResourceBytes = value => {
 	const num = Number(value || 0)
 	if (num >= 1024 * 1024 * 1024) {
-		return `${(num / 1024 / 1024 / 1024).toFixed(2)} GiB`
+		return `${(num / 1024 / 1024 / 1024).toFixed(2)} GB`
 	}
 	if (num >= 1024 * 1024) {
-		return `${(num / 1024 / 1024).toFixed(2)} MiB`
+		return `${(num / 1024 / 1024).toFixed(2)} MB`
 	}
 	return `${num.toFixed(0)} B`
 }
@@ -181,6 +181,57 @@ export const resolvePlatformContext = props => {
 export const displayText = (...values) => {
   const value = values.find(item => item !== undefined && item !== null && String(item).trim() !== '')
   return value === undefined || value === null ? '' : String(value)
+}
+
+const inferGatewayDomainScheme = record => {
+  const scheme = displayText(record?.scheme, record?.protocol, record?.match?.scheme, record?.match?.protocol).toLowerCase()
+  if (scheme.includes('https')) {
+    return 'https'
+  }
+  if (record?.https || record?.tls || record?.certificate_id || record?.certificateID || record?.certificates || record?.auto_ssl) {
+    return 'https'
+  }
+  return 'http'
+}
+
+const normalizeGatewayDomainHost = host => displayText(host).trim().toLowerCase()
+
+export const normalizeSLAGatewayDomains = routes => {
+  const items = []
+  const exists = new Set()
+  ;(Array.isArray(routes) ? routes : []).forEach(record => {
+    const hosts = [
+      ...(Array.isArray(record?.match?.hosts) ? record.match.hosts : []),
+      ...(Array.isArray(record?.hosts) ? record.hosts : []),
+      ...(Array.isArray(record?.domains) ? record.domains : []),
+    ]
+    const scheme = inferGatewayDomainScheme(record)
+    hosts.forEach(host => {
+      const domain = normalizeGatewayDomainHost(host)
+      if (!domain || domain.includes('*') || domain.includes('://') || /[\s/?#]/.test(domain)) {
+        return
+      }
+      const key = `${scheme}://${domain}`
+      if (exists.has(key)) {
+        return
+      }
+      exists.add(key)
+      items.push({
+        domain,
+        scheme,
+        url: `${scheme}://${domain}/`,
+        route_name: displayText(record?.name, record?.route_name),
+        component_id: displayText(record?.service_alias, record?.component_id, record?.service_id),
+        component_name: displayText(record?.component_name, record?.service_name, record?.service_alias, record?.component_id),
+        paths: Array.isArray(record?.match?.paths) ? record.match.paths : [],
+      })
+    })
+  })
+  return {
+    items,
+    default_domain: items.length === 1 ? items[0].domain : '',
+    selection_required: items.length > 1,
+  }
 }
 
 export const isRainbondAppID = value => /^\d+$/.test(displayText(value))

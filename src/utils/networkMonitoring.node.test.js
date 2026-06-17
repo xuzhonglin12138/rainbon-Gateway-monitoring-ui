@@ -12,7 +12,7 @@ function loadNetworkMonitoring() {
   const filename = path.join(__dirname, 'networkMonitoring.js');
   let source = fs.readFileSync(filename, 'utf8');
   source = source.replace(/export const /g, 'const ');
-  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, resolveRecordAppID, resolveRecordComponentID, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
+  source += '\nmodule.exports = { resolveComponentContext, resolveTeamPathFromRecord, getLatestTrendPoint, getPeakTrendValues, getRealtimeMetricPoint, getTeamThroughputItems, getWindowSeconds, getRouteThroughput, getDelayedQueryEndTime, buildWindowQueryParams, buildComponentDisplayMap, getComponentDisplayName, resolveRecordAppID, resolveRecordComponentID, normalizeSLAGatewayDomains, DEFAULT_REFRESH_INTERVAL_MS, REFRESH_INTERVAL_OPTIONS };';
   const mod = new Module(filename, module);
   mod.filename = filename;
   mod.paths = Module._nodeModulePaths(__dirname);
@@ -35,6 +35,7 @@ const {
   getComponentDisplayName,
   resolveRecordAppID,
   resolveRecordComponentID,
+  normalizeSLAGatewayDomains,
   DEFAULT_REFRESH_INTERVAL_MS,
   REFRESH_INTERVAL_OPTIONS,
 } = loadNetworkMonitoring();
@@ -278,4 +279,50 @@ test('record app jump id only accepts numeric Rainbond app ids', function () {
   assert.equal(resolveRecordAppID({ app_id: '65f629e7622d450594e3f2e35f6de412' }), '');
   assert.equal(resolveRecordAppID({ region_app_id: '65f629e7622d450594e3f2e35f6de412' }), '');
   assert.equal(resolveRecordAppID({ group_id: 1136 }), '1136');
+});
+
+test('normalizeSLAGatewayDomains filters wildcard hosts and deduplicates domains', function () {
+  const result = normalizeSLAGatewayDomains([
+    {
+      name: 'route-a',
+      protocol: 'HTTPS',
+      service_alias: 'grweb',
+      component_name: 'Web 服务',
+      match: {
+        hosts: ['Demo.Example.com', '*.example.com', 'demo.example.com'],
+        paths: ['/'],
+      },
+    },
+    {
+      name: 'route-b',
+      match: {
+        hosts: ['api.example.com'],
+        paths: ['/api'],
+      },
+    },
+  ]);
+
+  assert.equal(result.items.length, 2);
+  assert.equal(result.selection_required, true);
+  assert.equal(result.default_domain, '');
+  assert.equal(result.items[0].domain, 'demo.example.com');
+  assert.equal(result.items[0].scheme, 'https');
+  assert.equal(result.items[0].url, 'https://demo.example.com/');
+  assert.equal(result.items[0].component_name, 'Web 服务');
+  assert.equal(result.items[1].domain, 'api.example.com');
+  assert.equal(result.items[1].scheme, 'http');
+});
+
+test('normalizeSLAGatewayDomains selects the only gateway domain by default', function () {
+  const result = normalizeSLAGatewayDomains([
+    {
+      match: {
+        hosts: ['app.example.com'],
+      },
+    },
+  ]);
+
+  assert.equal(result.items.length, 1);
+  assert.equal(result.default_domain, 'app.example.com');
+  assert.equal(result.selection_required, false);
 });

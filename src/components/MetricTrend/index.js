@@ -41,10 +41,10 @@ const alphaColor = (color, alpha) => {
 const formatBytesPerSecond = value => {
   const number = Number(value || 0)
   if (number >= 1024 * 1024) {
-    return `${(number / 1024 / 1024).toFixed(2)} MiB/s`
+    return `${(number / 1024 / 1024).toFixed(2)} MB/s`
   }
   if (number >= 1024) {
-    return `${(number / 1024).toFixed(2)} KiB/s`
+    return `${(number / 1024).toFixed(2)} KB/s`
   }
   return `${number.toFixed(0)} B/s`
 }
